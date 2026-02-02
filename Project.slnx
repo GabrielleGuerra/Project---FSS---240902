@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Project.WinForms/Project.WinForms.csproj" />
+  </Folder>
+</Solution>

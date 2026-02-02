@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Renderizar SVG a Bitmap en runtime para usar como Icon -->
+    <PackageReference Include="Svg" Version="3.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Incluir el SVG en la salida para poder cargarlo en tiempo de ejecución -->
+    <None Include="assets\icon.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
