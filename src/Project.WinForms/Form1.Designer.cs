@@ -97,23 +97,25 @@ partial class Form1
             txtExpresion.Clear();
             var lblResultado = this.Controls[0].Controls["lblResultado"] as System.Windows.Forms.Label;
             var lblHistorial = this.Controls[0].Controls["lblHistorial"] as System.Windows.Forms.Label;
+            var treeArbol = this.Controls[0].Controls["treeArbolSintactico"] as System.Windows.Forms.TreeView;
             if (lblResultado != null) lblResultado.Text = "";
             if (lblHistorial != null) lblHistorial.Text = "";
+            if (treeArbol != null) treeArbol.Nodes.Clear();
             txtExpresion.Focus();
         };
 
         panelBotones.Controls.Add(btnCalcular);
         panelBotones.Controls.Add(btnLimpiar);
 
-        // Etiqueta pequeña que indica la sección de resultado (puede eliminarse si solo desea el número)
+        // Etiqueta pequeña que indica la sección de resultado
         System.Windows.Forms.Label lblEtiquetaResultado = new System.Windows.Forms.Label();
-        lblEtiquetaResultado.Text = "Resultado:"; //etiqueta pequena
+        lblEtiquetaResultado.Text = "Resultado:";
         lblEtiquetaResultado.Font = new System.Drawing.Font("Arial", 11);
         lblEtiquetaResultado.Dock = DockStyle.Top;
         lblEtiquetaResultado.Height = 30;
         lblEtiquetaResultado.Padding = new System.Windows.Forms.Padding(0, 10, 0, 0);
 
-        // Label donde se muestra el resultado calculado (solo el número)
+        // Label donde se muestra el resultado calculado
         System.Windows.Forms.Label lblResultado = new System.Windows.Forms.Label();
         lblResultado.Name = "lblResultado";
         lblResultado.Text = "";
@@ -124,7 +126,24 @@ partial class Form1
         lblResultado.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
         lblResultado.AutoSize = false;
 
-        // Historial de cálculos (texto con fuente monoespaciada)
+        // ==================== NUEVO: TreeView para Árbol Sintáctico ====================
+        System.Windows.Forms.Label lblEtiquetaArbol = new System.Windows.Forms.Label();
+        lblEtiquetaArbol.Text = "Árbol Sintáctico:";
+        lblEtiquetaArbol.Font = new System.Drawing.Font("Arial", 10);
+        lblEtiquetaArbol.Dock = DockStyle.Top;
+        lblEtiquetaArbol.Height = 25;
+        lblEtiquetaArbol.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
+
+        System.Windows.Forms.TreeView treeArbolSintactico = new System.Windows.Forms.TreeView();
+        treeArbolSintactico.Name = "treeArbolSintactico";
+        treeArbolSintactico.Dock = DockStyle.Top;
+        treeArbolSintactico.Height = 150;
+        treeArbolSintactico.Font = new System.Drawing.Font("Consolas", 9);
+        treeArbolSintactico.ShowLines = true;
+        treeArbolSintactico.ShowPlusMinus = true;
+        treeArbolSintactico.BorderStyle = BorderStyle.FixedSingle;
+
+        // Historial de cálculos
         System.Windows.Forms.Label lblEtiquetaHistorial = new System.Windows.Forms.Label();
         lblEtiquetaHistorial.Text = "Historial:";
         lblEtiquetaHistorial.Font = new System.Drawing.Font("Arial", 10);
@@ -138,11 +157,13 @@ partial class Form1
         lblHistorial.Dock = DockStyle.Fill;
         lblHistorial.AutoSize = false;
 
-        // Agregar controles al formulario en orden (el orden afecta el layout)
+        // Agregar controles al formulario en orden
         this.Controls.Add(panelPrincipal);
 
         panelPrincipal.Controls.Add(lblHistorial);
         panelPrincipal.Controls.Add(lblEtiquetaHistorial);
+        panelPrincipal.Controls.Add(treeArbolSintactico);  // NUEVO
+        panelPrincipal.Controls.Add(lblEtiquetaArbol);      // NUEVO
         panelPrincipal.Controls.Add(lblResultado);
         panelPrincipal.Controls.Add(lblEtiquetaResultado);
         panelPrincipal.Controls.Add(panelBotones);

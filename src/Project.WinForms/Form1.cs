@@ -5,6 +5,8 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Drawing;
+using System.Linq;
 using Svg;
 
 /// Formulario principal de la aplicación.
@@ -56,12 +58,12 @@ public partial class Form1 : Form
         }
         catch
         {
-            // Si falla por cualquier motivo, aqui tengo que agregar otro ico por si falla
+            // Si falla por cualquier motivo, aquí tengo que agregar otro ico por si falla
         }
 
         if (this.Icon == null)
             this.Icon = System.Drawing.SystemIcons.Application;
-        this.Size = new System.Drawing.Size(700, 400);
+        this.Size = new System.Drawing.Size(700, 650); // Aumentado para el TreeView
         this.StartPosition = FormStartPosition.CenterScreen;
         // Crear el evaluador que usaremos al calcular expresiones
         evaluador = new Evaluador();
@@ -69,9 +71,6 @@ public partial class Form1 : Form
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool DestroyIcon(IntPtr hIcon);
-
-    
-
 
     /// Valida la expresión ingresada, la evalúa y actualiza la interfaz con
     /// el resultado y el historial.
@@ -89,175 +88,470 @@ public partial class Form1 : Form
 
         try
         {
-            // Evaluar la expresión usando la clase Evaluador
-            double resultado = evaluador.Evaluar(expresion);
+            // Evaluar la expresión usando la clase Evaluador (ahora devuelve ResultadoEvaluacion)
+            ResultadoEvaluacion resultado = evaluador.Evaluar(expresion);
 
-            // Obtener referencias a los labels donde mostraremos datos
+            // Obtener referencias a los controles
             var lblResultado = this.Controls[0].Controls["lblResultado"] as System.Windows.Forms.Label;
             var lblHistorial = this.Controls[0].Controls["lblHistorial"] as System.Windows.Forms.Label;
+            var treeArbol = this.Controls[0].Controls["treeArbolSintactico"] as System.Windows.Forms.TreeView;
 
-            if (lblResultado != null && lblHistorial != null)
+            if (lblResultado != null && lblHistorial != null && treeArbol != null)
             {
-                // Formatear resultado: si es entero mostrar sin decimales,
-                // si tiene parte decimal limitar a 6 y recortar ceros innecesarios.
-                string resultadoFormato = resultado == Math.Floor(resultado) ? 
-                    resultado.ToString("F0") : 
-                    resultado.ToString("F6").TrimEnd('0').TrimEnd('.');
+                // Formatear resultado
+                string resultadoFormato = resultado.Valor == Math.Floor(resultado.Valor) ? 
+                    resultado.Valor.ToString("F0") : 
+                    resultado.Valor.ToString("F6").TrimEnd('0').TrimEnd('.');
 
-                // Mostrar solo el número (sin texto adicional) en el label de resultado
+                // Mostrar resultado
                 lblResultado.Text = resultadoFormato;
 
-                // Agregar el cálculo al historial (expresión = resultado) en la parte superior
+                // Actualizar árbol sintáctico
+                treeArbol.Nodes.Clear();
+                if (resultado.ArbolSintactico != null)
+                {
+                    TreeNode nodoRaiz = ConstruirNodoArbol(resultado.ArbolSintactico);
+                    treeArbol.Nodes.Add(nodoRaiz);
+                    treeArbol.ExpandAll();
+                }
+
+                // Agregar al historial con info de variables asignadas
                 string historialActual = lblHistorial.Text;
-                lblHistorial.Text = $"{expresion} = {resultadoFormato}\n{historialActual}";
+                string infoVariables = "";
+                if (resultado.VariablesAsignadas.Count > 0)
+                {
+                    var asignaciones = resultado.VariablesAsignadas.Select(v => $"{v.Key}={v.Value:F6}".TrimEnd('0').TrimEnd('.'));
+                    infoVariables = $" ({string.Join(", ", asignaciones)})";
+                }
+                lblHistorial.Text = $"{expresion} = {resultadoFormato}{infoVariables}\n{historialActual}";
                 
-                // Preparar la UI para la siguiente entrada
+                // Preparar para siguiente entrada
                 txtExpresion.Clear();
+                txtExpresion.Focus();
+            }
+        }
+        catch (ErrorSintactico ex)
+        {
+            // Error con posición exacta
+            string mensajeError = "ERROR DE SINTAXIS:\n\n";
+            mensajeError += ex.Message + "\n\n";
+            mensajeError += expresion + "\n";
+            mensajeError += new string(' ', ex.Posicion) + "^\n";
+            mensajeError += new string(' ', ex.Posicion) + "└── Aquí está el error";
+            
+            MessageBox.Show(mensajeError, "Error de Sintaxis", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            
+            // Posicionar cursor en el error
+            if (ex.Posicion < txtExpresion.Text.Length)
+            {
+                txtExpresion.Select(ex.Posicion, 1);
                 txtExpresion.Focus();
             }
         }
         catch (Exception ex)
         {
-            // Mensaje amigable con el detalle del error para depuración
             MessageBox.Show($"Error en la expresión:\n{ex.Message}", "Error de Cálculo", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
+
+    /// Construye un TreeNode a partir de un nodo del AST
+    private TreeNode ConstruirNodoArbol(NodoAST nodo)
+    {
+        TreeNode treeNode = new TreeNode();
+
+        if (nodo is NodoNumero numeroNodo)
+        {
+            treeNode.Text = $"Número: {numeroNodo.Valor}";
+            treeNode.ForeColor = Color.DarkBlue;
+        }
+        else if (nodo is NodoVariable variableNodo)
+        {
+            treeNode.Text = $"Variable: {variableNodo.Nombre}";
+            treeNode.ForeColor = Color.DarkGreen;
+        }
+        else if (nodo is NodoOperacionBinaria binarioNodo)
+        {
+            treeNode.Text = $"Operación: {binarioNodo.Operador}";
+            treeNode.ForeColor = Color.DarkRed;
+            treeNode.Nodes.Add(ConstruirNodoArbol(binarioNodo.Izquierdo));
+            treeNode.Nodes.Add(ConstruirNodoArbol(binarioNodo.Derecho));
+        }
+        else if (nodo is NodoOperacionUnaria unarioNodo)
+        {
+            treeNode.Text = $"Unario: {unarioNodo.Operador}";
+            treeNode.ForeColor = Color.DarkOrange;
+            treeNode.Nodes.Add(ConstruirNodoArbol(unarioNodo.Operando));
+        }
+        else if (nodo is NodoAsignacion asignacionNodo)
+        {
+            treeNode.Text = $"Asignación: {asignacionNodo.NombreVariable}";
+            treeNode.ForeColor = Color.DarkMagenta;
+            treeNode.Nodes.Add(ConstruirNodoArbol(asignacionNodo.Expresion));
+        }
+
+        return treeNode;
+    }
 }
 
-/// Evaluador de expresiones matemáticas usando análisis recursivo descendente.
-/// Soporta: +, -, *, /, paréntesis, números enteros y flotantes, y unarios negativos.
+// error sintáctico con posición exacta
+public class ErrorSintactico : Exception
+{
+    public int Posicion { get; set; }
+    
+    public ErrorSintactico(string mensaje, int posicion) : base(mensaje)
+    {
+        Posicion = posicion;
+    }
+}
+
+// ==================== RESULTADO DE EVALUACIÓN ====================
+public class ResultadoEvaluacion
+{
+    public double Valor { get; set; }
+    public NodoAST ArbolSintactico { get; set; }
+    public Dictionary<string, double> VariablesAsignadas { get; set; }
+    
+    public ResultadoEvaluacion()
+    {
+        VariablesAsignadas = new Dictionary<string, double>();
+    }
+}
+
+//nodos del AST para representar números, variables, operaciones binarias, unarias y asignaciones
+public abstract class NodoAST
+{
+    public abstract double Evaluar(Dictionary<string, double> variables, Dictionary<string, double> asignadas);
+}
+
+// Nodo para representar un número literal
+public class NodoNumero : NodoAST
+{
+    public double Valor { get; set; }
+    
+    public NodoNumero(double valor)
+    {
+        Valor = valor;
+    }
+    
+    public override double Evaluar(Dictionary<string, double> variables, Dictionary<string, double> asignadas)
+    {
+        return Valor;
+    }
+}
+
+//nodo para representar una variable (su valor se obtiene del diccionario de variables)
+public class NodoVariable : NodoAST
+{
+    public string Nombre { get; set; }
+    
+    public NodoVariable(string nombre)
+    {
+        Nombre = nombre;
+    }
+    
+    public override double Evaluar(Dictionary<string, double> variables, Dictionary<string, double> asignadas)
+    {
+        if (!variables.ContainsKey(Nombre))
+        {
+            throw new Exception($"Variable '{Nombre}' no está definida");
+        }
+        return variables[Nombre];
+    }
+}
+
+// Nodo para representar una operación binaria (suma, resta, multiplicación, división)
+public class NodoOperacionBinaria : NodoAST
+{
+    public NodoAST Izquierdo { get; set; }
+    public NodoAST Derecho { get; set; }
+    public char Operador { get; set; }
+    
+    public NodoOperacionBinaria(NodoAST izq, char op, NodoAST der)
+    {
+        Izquierdo = izq;
+        Operador = op;
+        Derecho = der;
+    }
+    
+    public override double Evaluar(Dictionary<string, double> variables, Dictionary<string, double> asignadas)
+    {
+        double izq = Izquierdo.Evaluar(variables, asignadas);
+        double der = Derecho.Evaluar(variables, asignadas);
+        
+        return Operador switch
+        {
+            '+' => izq + der,
+            '-' => izq - der,
+            '*' => izq * der,
+            '/' => der == 0 ? throw new DivideByZeroException("División por cero") : izq / der,
+            _ => throw new Exception($"Operador desconocido: {Operador}")
+        };
+    }
+}
+
+//nodo para representar una operación unaria (negación)
+public class NodoOperacionUnaria : NodoAST
+{
+    public NodoAST Operando { get; set; }
+    public char Operador { get; set; }
+    
+    public NodoOperacionUnaria(char op, NodoAST operando)
+    {
+        Operador = op;
+        Operando = operando;
+    }
+    
+    public override double Evaluar(Dictionary<string, double> variables, Dictionary<string, double> asignadas)
+    {
+        double valor = Operando.Evaluar(variables, asignadas);
+        return Operador == '-' ? -valor : valor;
+    }
+}
+
+//nodo para representar una asignación de variable (ej: x = 5 + 3)
+public class NodoAsignacion : NodoAST
+{
+    public string NombreVariable { get; set; }
+    public NodoAST Expresion { get; set; }
+    
+    public NodoAsignacion(string nombre, NodoAST expresion)
+    {
+        NombreVariable = nombre;
+        Expresion = expresion;
+    }
+    
+    public override double Evaluar(Dictionary<string, double> variables, Dictionary<string, double> asignadas)
+    {
+        double valor = Expresion.Evaluar(variables, asignadas);
+        variables[NombreVariable] = valor;
+        asignadas[NombreVariable] = valor; // Registrar asignación
+        return valor;
+    }
+}
+
+/// Evaluador de expresiones matemáticas con análisis léxico y sintáctico.
+/// Soporta: +, -, *, /, paréntesis, números (enteros y decimales), variables y asignaciones.
+/// Las asignaciones pueden aparecer en cualquier lugar de la expresión.
 public class Evaluador
 {
     private string expresion;
     private int posicion;
+    private Dictionary<string, double> variables;
 
     public Evaluador()
     {
         expresion = "";
         posicion = 0;
+        variables = new Dictionary<string, double>();
     }
 
-    /// Evalúa la expresión dada y devuelve el resultado como double.
-    /// "Lanza ArgumentException" si la expresión está vacía y
-    /// "FormatException" si hay caracteres inesperados.
-    public double Evaluar(string expr)
+    /// Evalúa la expresión y devuelve el resultado con el árbol sintáctico
+    public ResultadoEvaluacion Evaluar(string expr)
     {
-        // Eliminar espacios para simplificar el parsing
+        // Eliminar espacios
         expresion = expr.Replace(" ", "");
         posicion = 0;
 
         if (string.IsNullOrWhiteSpace(expresion))
             throw new ArgumentException("Expresión vacía");
 
-        double resultado = ParseExpresion();
+        // Rastrear variables asignadas en esta evaluación
+        var asignadas = new Dictionary<string, double>();
 
-        // Si no consumimos toda la cadena hay un error de formato
+        // Construir árbol sintáctico
+        NodoAST arbol = ParseExpresion();
+
+        // Verificar que se consumió toda la expresión
         if (posicion < expresion.Length)
-            throw new FormatException($"Caracteres inesperados después de la expresión: '{expresion[posicion]}'");
+        {
+            throw new ErrorSintactico(
+                $"Caracteres inesperados: '{expresion[posicion]}'",
+                posicion
+            );
+        }
 
-        return resultado;
+        // Evaluar
+        double resultado = arbol.Evaluar(variables, asignadas);
+
+        return new ResultadoEvaluacion
+        {
+            Valor = resultado,
+            ArbolSintactico = arbol,
+            VariablesAsignadas = asignadas
+        };
     }
 
     // E → T (('+' | '-') T)*
-    /// Nivel de menor precedencia: suma y resta.
-    private double ParseExpresion()
+    private NodoAST ParseExpresion()
     {
-        double resultado = ParseTermino();
+        NodoAST izquierdo = ParseTermino();
 
         while (posicion < expresion.Length && (expresion[posicion] == '+' || expresion[posicion] == '-'))
         {
             char op = expresion[posicion++];
-            double derecha = ParseTermino();
-            // Aplicar la operación correspondiente
-            resultado = op == '+' ? resultado + derecha : resultado - derecha;
+            NodoAST derecho = ParseTermino();
+            izquierdo = new NodoOperacionBinaria(izquierdo, op, derecho);
         }
 
-        return resultado;
+        return izquierdo;
     }
 
     // T → U (('*' | '/') U)*
-    /// Nivel de multiplicación y división.
-    private double ParseTermino()
+    private NodoAST ParseTermino()
     {
-        double resultado = ParseUnaria();
+        NodoAST izquierdo = ParseUnaria();
 
         while (posicion < expresion.Length && (expresion[posicion] == '*' || expresion[posicion] == '/'))
         {
             char op = expresion[posicion++];
-            double derecha = ParseUnaria();
-            
-            if (op == '*')
-                resultado *= derecha;
-            else
-            {
-                // Comprobar división por cero y lanzar excepción descriptiva
-                if (derecha == 0)
-                    throw new DivideByZeroException("División por cero");
-                resultado /= derecha;
-            }
+            NodoAST derecho = ParseUnaria();
+            izquierdo = new NodoOperacionBinaria(izquierdo, op, derecho);
         }
 
-        return resultado;
+        return izquierdo;
     }
 
-    // U → '-' U | F
-    /// Maneja el operador unario negativo.
-    private double ParseUnaria()
+    // U → '-' U | '+' U | F
+    private NodoAST ParseUnaria()
     {
-        if (posicion < expresion.Length && expresion[posicion] == '-')
+        if (posicion < expresion.Length && (expresion[posicion] == '-' || expresion[posicion] == '+'))
         {
-            posicion++;
-            // Aplicar unario negativo de forma recursiva (soporta varios '-').
-            return -ParseUnaria();
+            char op = expresion[posicion++];
+            return new NodoOperacionUnaria(op, ParseUnaria());
         }
 
-        return ParseFactor();
+        return ParsePrimario();
     }
 
-    // F → '(' E ')' | NUMBER
-    /// Factor: paréntesis o número literal.
-    private double ParseFactor()
+    // F → '(' E ')' | '(' ASIGNACIÓN ')' | ASIGNACIÓN | NÚMERO | IDENTIFICADOR
+    private NodoAST ParsePrimario()
     {
+        // Paréntesis - puede contener expresión o asignación
         if (posicion < expresion.Length && expresion[posicion] == '(')
         {
-            posicion++; // consume '('
-            double resultado = ParseExpresion();
+            posicion++; // consumir '('
+            
+            // Verificar si es una asignación dentro de paréntesis
+            if (posicion < expresion.Length && char.IsLetter(expresion[posicion]))
+            {
+                int posTemp = posicion;
+                string id = LeerIdentificador();
+                
+                if (posicion < expresion.Length && expresion[posicion] == '=')
+                {
+                    // Es una asignación: (x = expr)
+                    posicion++; // consumir '='
+                    NodoAST valorExpresion = ParseExpresion();
+                    
+                    if (posicion >= expresion.Length || expresion[posicion] != ')')
+                    {
+                        throw new ErrorSintactico("Paréntesis no cerrado", posicion);
+                    }
+                    posicion++; // consumir ')'
+                    
+                    return new NodoAsignacion(id, valorExpresion);
+                }
+                else
+                {
+                    // No es asignación, retroceder y parsear como expresión normal
+                    posicion = posTemp;
+                }
+            }
+            
+            // Parsear como expresión normal
+            NodoAST nodo = ParseExpresion();
 
             if (posicion >= expresion.Length || expresion[posicion] != ')')
-                throw new FormatException("Paréntesis no cerrado");
+            {
+                throw new ErrorSintactico("Paréntesis no cerrado", posicion);
+            }
 
-            posicion++; // consume ')'
-            return resultado;
+            posicion++; // consumir ')'
+            return nodo;
         }
 
-        return ParseNumero();
+        // Identificador - puede ser variable o asignación
+        if (posicion < expresion.Length && char.IsLetter(expresion[posicion]))
+        {
+            int posInicial = posicion;
+            string identificador = LeerIdentificador();
+            
+            // Verificar si es una asignación (sin paréntesis)
+            if (posicion < expresion.Length && expresion[posicion] == '=')
+            {
+                posicion++; // consumir '='
+                NodoAST valorExpresion = ParseExpresion();
+                return new NodoAsignacion(identificador, valorExpresion);
+            }
+            
+            // Es solo una variable
+            return new NodoVariable(identificador);
+        }
+
+        // Número
+        if (posicion < expresion.Length && (char.IsDigit(expresion[posicion]) || expresion[posicion] == '.'))
+        {
+            return new NodoNumero(ParseNumero());
+        }
+
+        throw new ErrorSintactico(
+            $"Se esperaba un número, variable o '(', pero se encontró '{(posicion < expresion.Length ? expresion[posicion].ToString() : "fin de expresión")}'",
+            posicion
+        );
     }
 
-    /// Lee un número (entero o flotante) desde la posición actual.
+    private string LeerIdentificador()
+    {
+        int inicio = posicion;
+        
+        while (posicion < expresion.Length && (char.IsLetterOrDigit(expresion[posicion]) || expresion[posicion] == '_'))
+        {
+            posicion++;
+        }
+
+        if (posicion == inicio)
+        {
+            throw new ErrorSintactico("Identificador esperado", posicion);
+        }
+
+        return expresion.Substring(inicio, posicion - inicio);
+    }
+
     private double ParseNumero()
     {
         int inicio = posicion;
 
-        // Leer dígitos antes del punto decimal (si existen)
+        // Leer dígitos antes del punto
         while (posicion < expresion.Length && char.IsDigit(expresion[posicion]))
             posicion++;
 
-        // Si hay punto, leer la parte fraccionaria
+        // Si hay punto decimal
         if (posicion < expresion.Length && expresion[posicion] == '.')
         {
             posicion++;
+            
+            // Debe haber al menos un dígito después del punto
+            if (posicion >= expresion.Length || !char.IsDigit(expresion[posicion]))
+            {
+                throw new ErrorSintactico("Número decimal inválido (falta dígito después del punto)", posicion);
+            }
+            
             while (posicion < expresion.Length && char.IsDigit(expresion[posicion]))
                 posicion++;
         }
 
-        // Validar que se haya leído al menos un dígito válido
+        // Validar que se leyó algo
         if (posicion == inicio || (posicion == inicio + 1 && expresion[inicio] == '.'))
-            throw new FormatException($"Número inválido en posición {posicion}");
+        {
+            throw new ErrorSintactico($"Número inválido", posicion);
+        }
 
         string numeroStr = expresion.Substring(inicio, posicion - inicio);
         
         if (!double.TryParse(numeroStr, out double numero))
-            throw new FormatException($"No se puede parsear '{numeroStr}' como número");
+        {
+            throw new ErrorSintactico($"No se puede convertir '{numeroStr}' a número", inicio);
+        }
 
         return numero;
     }
