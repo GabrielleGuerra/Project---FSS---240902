@@ -6,6 +6,7 @@ namespace MyWinFormsApp
 {
     public class InstruccionInfo
     {
+        // formato de una instruccion
         public string Nombre { get; set; }
         public int Formato { get; set; }
         public string TipoOperando { get; set; }
@@ -100,11 +101,14 @@ namespace MyWinFormsApp
             tabla["BASE"] = new InstruccionInfo("BASE", 0, "etiqueta", 1);
         }
 
-        public InstruccionInfo Obtener(string nombre)
+        //obtenemos la info de una instriccion por su nombre, si no existe devuelve null
+        public InstruccionInfo? Obtener(string nombre)
         {
+            // vuelvo todo mayuscula para evitar problemas de busqueda
             return tabla.TryGetValue(nombre.ToUpper(), out var info) ? info : null;
         }
 
+        //checa que una instruccion exista en la tabla, devuelve true o false
         public bool Existe(string nombre)
         {
             return tabla.ContainsKey(nombre.ToUpper());
@@ -113,11 +117,12 @@ namespace MyWinFormsApp
 
     public class LineaProcesada
     {
+        //estructura de una linea ya procesada, con su numero, contador, etiqueta, operacion, operandos, errores y si es valida o no
         public int NumeroLinea { get; set; }
-        public string Contador { get; set; }
-        public string Etiqueta { get; set; }
-        public string Operacion { get; set; }
-        public string Operandos { get; set; }
+        public string Contador { get; set; } = "";
+        public string Etiqueta { get; set; } = "";
+        public string Operacion { get; set; } = "";
+        public string Operandos { get; set; } = "";
         public List<string> Errores { get; set; }
         public bool Valida { get; set; }
 
@@ -128,7 +133,11 @@ namespace MyWinFormsApp
         }
     }
 
-    public class AnalizadorSicXe
+    //=======================================================================================
+    // CLASE PRINCIPAL
+    //aqui analizamos el codigo, linea por linea, identificando etiquetas, operaciones, operandos y errores, y construyendo la tabla de simbolos 
+    //=======================================================================================
+    public class AnalizadorSicXe 
     {
         private TablaCodigos tabla;
         private List<LineaProcesada> lineasProcesadas;
@@ -146,26 +155,32 @@ namespace MyWinFormsApp
 
         public void Analizar(string contenido)
         {
+            //limpiar todos los datos anteriores para un nuevo análisis
             lineasProcesadas.Clear();
             erroresGlobales.Clear();
             tablaSimbolos.Clear();
             contadorPrograma = 0;
 
+            //dividimos el contenido en lineas, eliminando las vacias
             string[] lineas = contenido.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
 
+            //procesamos cada linea individualmente
             foreach (var linea in lineas)
             {
                 ProcesarLinea(linea);
             }
         }
-
+    
         private void ProcesarLinea(string linea)
         {
+            //ignoramos lineas vacias 
             if (string.IsNullOrWhiteSpace(linea) || linea.TrimStart().StartsWith("."))
                 return;
 
+            //dividimos la linea en campos, usando tabulaciones y espacios como separadores, y eliminando vacios    
             string[] campos = linea.Split(new[] { '\t', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
+            //almacenamos la linea procesada
             var resultado = new LineaProcesada
             {
                 Contador = ContadorEnHex(),
@@ -208,6 +223,7 @@ namespace MyWinFormsApp
                     }
                     else
                     {
+                        // si es etiqueta no valida, registramos el error y no procesamos mas esta linea
                         resultado.Errores.Add($"[Léxico] Etiqueta inválida: '{primerCampo}'");
                         resultado.Valida = false;
                         lineasProcesadas.Add(resultado);
@@ -225,17 +241,18 @@ namespace MyWinFormsApp
                 }
             }
 
-            // PASO 2: Extraer operación
+            // PASO 2: Extraer operación  (si no hay etiqueta, el primer campo es la operación, si hay etiqueta, el segundo campo es la operación)
             if (indice < campos.Length)
             {
+                // detectar si la operación tiene formato 4 (empieza con +)
                 string campo = campos[indice].Trim();
 
                 bool esFormato4 = campo.StartsWith("+");
-                string operacionOriginal = campo;
+                string operacionOriginal = campo; // guardamos la operacion
                 
                 if (esFormato4)
                 {
-                    campo = campo.Substring(1);
+                    campo = campo.Substring(1); //quitamos el +
                 }
 
                 campo = campo.ToUpper();
@@ -252,9 +269,9 @@ namespace MyWinFormsApp
                 }
 
                 // PASO 3: Validar instrucción
-                InstruccionInfo info = tabla.Obtener(campo);
+                InstruccionInfo info = tabla.Obtener(campo); // obtenemos la info de la instruccion, si no existe, es un error léxico
 
-                if (info == null)
+                if (info == null) // instrucción no existe, mostrar error
                 {
                     resultado.Errores.Add($"[Léxico] Instrucción no existe: '{campo}'");
                     resultado.Valida = false;
@@ -266,22 +283,24 @@ namespace MyWinFormsApp
                     {
                         if (tablaSimbolos.ContainsKey(resultado.Etiqueta))
                         {
+                            //etiqueta ya existe, error semántico
                             resultado.Errores.Add($"[Semántico] Símbolo duplicado: '{resultado.Etiqueta}'");
                             resultado.Valida = false;
                         }
                         else
                         {
+                            //etiqueta válida, la agregamos a la tabla de símbolos con su dirección actual
                             tablaSimbolos[resultado.Etiqueta] = resultado.Contador;
                         }
                     }
 
-                    // Validar instrucción
+                    // Validar instrucción e incrementar contador de programa según el formato y tipo de instrucción
                     int incremento = ValidarInstruccion(info, resultado.Operandos, esFormato4, resultado.Errores);
 
                     if (resultado.Errores.Count == 0)
                     {
                         resultado.Valida = true;
-                        contadorPrograma += incremento;
+                        contadorPrograma += incremento; // solo incrementamos si no hay errores, para evitar confusiones en la dirección de las etiquetas siguientes
                     }
                     else
                     {
@@ -290,6 +309,7 @@ namespace MyWinFormsApp
                 }
             }
 
+            // Guardamos el resultado de esta línea procesada en la lista de líneas procesadas y acumulamos los errores globales con su número de línea correspondiente
             lineasProcesadas.Add(resultado);
             foreach (var error in resultado.Errores)
             {
@@ -297,6 +317,8 @@ namespace MyWinFormsApp
             }
         }
 
+        // funcion que valida la instruccion y devuelve el incremento del contador de programa segun su formato
+        // o 0 si hay errores (en ese caso se registran los errores en la lista de errores pasada como parametro)
         private int ValidarInstruccion(InstruccionInfo info, string operandos, bool esFormato4, List<string> errores)
         {
             // Directivas que no incrementan
@@ -310,10 +332,11 @@ namespace MyWinFormsApp
             {
                 if (!operandos.StartsWith("C'") && !operandos.StartsWith("X'"))
                 {
-                    errores.Add($"[Error Sintáctico] BYTE debe ser C'texto' o X'hexadecimal'");
+                    errores.Add($"[Sintáctico] BYTE debe ser C'texto' o X'hexadecimal'");
                     return 0;
                 }
 
+                //Calcular el tamaño de BYTE según su formato
                 if (operandos.StartsWith("C'") && operandos.EndsWith("'"))
                 {
                     string contenido = operandos.Substring(2, operandos.Length - 3);
@@ -322,17 +345,17 @@ namespace MyWinFormsApp
                 else if (operandos.StartsWith("X'") && operandos.EndsWith("'"))
                 {
                     string hex = operandos.Substring(2, operandos.Length - 3);
-                    return (hex.Length + 1) / 2;
+                    return (hex.Length + 1) / 2; //va de 2 en 2 caracteres hexadecimales por byte, redondeando hacia arriba si es impar
                 }
                 else
                 {
-                    errores.Add($"[Error Sintáctico] BYTE debe ser C'texto' o X'hexadecimal'");
+                    errores.Add($"[Sintáctico] BYTE debe ser C'texto' o X'hexadecimal'");
                     return 0;
                 }
             }
 
             // RESW, RESB, WORD
-            if (info.Nombre == "RESW")
+            if (info.Nombre == "RESW") // cada palabra son 3 bytes
             {
                 if (int.TryParse(operandos, out int num))
                 {
@@ -340,12 +363,12 @@ namespace MyWinFormsApp
                 }
                 else
                 {
-                    errores.Add($"[Error Sintáctico] RESW requiere un número");
+                    errores.Add($"[Sintáctico] RESW requiere un número");
                     return 0;
                 }
             }
 
-            if (info.Nombre == "RESB")
+            if (info.Nombre == "RESB") //guarda num bytes
             {
                 if (int.TryParse(operandos, out int num))
                 {
@@ -353,12 +376,12 @@ namespace MyWinFormsApp
                 }
                 else
                 {
-                    errores.Add($"[Error Sintáctico] RESB requiere un número");
+                    errores.Add($"[Sintáctico] RESB requiere un número");
                     return 0;
                 }
             }
 
-            if (info.Nombre == "WORD")
+            if (info.Nombre == "WORD") // cada palabra son 3 bytes
             {
                 if (int.TryParse(operandos, out int num))
                 {
@@ -366,7 +389,7 @@ namespace MyWinFormsApp
                 }
                 else
                 {
-                    errores.Add($"[Error Sintáctico] WORD requiere un número");
+                    errores.Add($"[Sintáctico] WORD requiere un número");
                     return 0;
                 }
             }
@@ -376,13 +399,13 @@ namespace MyWinFormsApp
             {
                 if (!string.IsNullOrEmpty(operandos))
                 {
-                    errores.Add($"[Error Sintáctico] {info.Nombre} no puede tener operandos");
+                    errores.Add($"[Sintáctico] {info.Nombre} no puede tener operandos");
                     return 0;
                 }
                 return 1;
             }
 
-            // FORMATO 2: Registros
+            // FORMATO 2: Registros r1 y r2, o r1 y n, o solo r1, o solo n
             if (info.Formato == 2)
             {
                 if (!ValidarFormato2(info, operandos, errores))
@@ -395,12 +418,12 @@ namespace MyWinFormsApp
             // FORMATO 3/4: Memoria (m)
             if (info.Formato == 34)
             {
-                // RSUB es especial
+                // RSUB es especial por que no tiene operandos, aunque es formato 3/4, asi que lo validamos aparte
                 if (info.Nombre == "RSUB")
                 {
                     if (!string.IsNullOrEmpty(operandos))
                     {
-                        errores.Add($"[Error Sintáctico] {info.Nombre} no puede tener operandos");
+                        errores.Add($"[Sintáctico] {info.Nombre} no puede tener operandos");
                         return 0;
                     }
                     return esFormato4 ? 4 : 3;
@@ -409,7 +432,14 @@ namespace MyWinFormsApp
                 // Otras instrucciones formato 3/4 con (m)
                 if (string.IsNullOrEmpty(operandos))
                 {
-                    errores.Add($"[Error Sintáctico] {info.Nombre} requiere 1 operando");
+                    errores.Add($"[Sintáctico] {info.Nombre} requiere 1 operando");
+                    return 0;
+                }
+
+                // Validar que no haya ## ni @@ (dobles)
+                if (operandos.Contains("##") || operandos.Contains("@@"))
+                {
+                    errores.Add($"[Sintáctico] Operando inválido: ## y @@ no son válidos");
                     return 0;
                 }
 
@@ -422,14 +452,14 @@ namespace MyWinFormsApp
                     // Solo puede haber exactamente 2 partes
                     if (partes.Length != 2)
                     {
-                        errores.Add($"[Error Sintáctico] {info.Nombre} solo puede tener 1 operando");
+                        errores.Add($"[Sintáctico] {info.Nombre} solo puede tener 1 operando");
                         return 0;
                     }
 
                     string segunda = partes[1].Trim().ToUpper();
                     if (segunda != "X")
                     {
-                        errores.Add($"[Error Sintáctico] {info.Nombre} solo puede ser indexado con ,X");
+                        errores.Add($"[Sintáctico] {info.Nombre} solo puede ser indexado con ,X");
                         return 0;
                     }
                 }
@@ -440,12 +470,12 @@ namespace MyWinFormsApp
                 {
                     if (primerOperando.Length <= 1 || primerOperando == "@")
                     {
-                        errores.Add($"[Error Sintáctico] @ debe ir seguido de un operando");
+                        errores.Add($"[Sintáctico] @ debe ir seguido de un operando");
                         return 0;
                     }
                 }
 
-                return esFormato4 ? 4 : 3;
+                return esFormato4 ? 4 : 3; //+op = formato 4, op = formato 3
             }
 
             return 0;
@@ -455,17 +485,18 @@ namespace MyWinFormsApp
         {
             if (string.IsNullOrEmpty(operandos))
             {
-                errores.Add($"[Error Sintáctico] {info.Nombre} requiere operandos");
+                errores.Add($"[Sintáctico] {info.Nombre} requiere operandos");
                 return false;
             }
 
             string[] ops = operandos.Split(',');
 
+            // validar segun el tipo requerido.
             if (info.TipoOperando == "r1" && ops.Length == 1)
             {
                 if (!EsRegistroValido(ops[0].Trim()))
                 {
-                    errores.Add($"[Error Sintáctico] {ops[0].Trim()} no es un registro válido");
+                    errores.Add($"[Sintáctico] {ops[0].Trim()} no es un registro válido");
                     return false;
                 }
                 return true;
@@ -474,7 +505,7 @@ namespace MyWinFormsApp
             {
                 if (!EsRegistroValido(ops[0].Trim()) || !EsRegistroValido(ops[1].Trim()))
                 {
-                    errores.Add($"[Error Sintáctico] Registros inválidos");
+                    errores.Add($"[Sintáctico] Registros inválidos");
                     return false;
                 }
                 return true;
@@ -483,7 +514,7 @@ namespace MyWinFormsApp
             {
                 if (!int.TryParse(ops[0].Trim(), out _))
                 {
-                    errores.Add($"[Error Sintáctico] Debe ser un número");
+                    errores.Add($"[Sintáctico] Debe ser un número");
                     return false;
                 }
                 return true;
@@ -492,17 +523,17 @@ namespace MyWinFormsApp
             {
                 if (!EsRegistroValido(ops[0].Trim()) || !int.TryParse(ops[1].Trim(), out _))
                 {
-                    errores.Add($"[Error Sintáctico] Formato inválido");
+                    errores.Add($"[Sintáctico] Formato inválido");
                     return false;
                 }
                 return true;
             }
 
-            errores.Add($"[Error Sintáctico] Operandos inválidos para {info.Nombre}");
+            errores.Add($"[Sintáctico] Operandos inválidos para {info.Nombre}");
             return false;
         }
 
-        private bool EsRegistroValido(string reg)
+        private bool EsRegistroValido(string reg) //registros validos de SICXE
         {
             var registros = new[] { "A", "X", "L", "B", "S", "T", "F", "PC", "SW" };
             return registros.Contains(reg.ToUpper());
@@ -518,7 +549,7 @@ namespace MyWinFormsApp
 
         private string ContadorEnHex()
         {
-            return contadorPrograma.ToString("X4");
+            return contadorPrograma.ToString("X4"); //contador hex a 4 digitos, por ejemplo 0000, 0003, 0012, etc.
         }
 
         public List<LineaProcesada> ObtenerLineasProcesadas() => lineasProcesadas;
