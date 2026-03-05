@@ -20,289 +20,289 @@ namespace MyWinFormsApp
             ConfigurarEventos();
         }
 
-        // Método para conectar los botones con sus eventos
         private void ConfigurarEventos()
         {
-            var btnAbrir = this.Controls.Find("btnAbrir", true).FirstOrDefault() as Button;
-            var btnAnalizar = this.Controls.Find("btnAnalizar", true).FirstOrDefault() as Button;
+            var btnAbrir   = this.Controls.Find("btnAbrir",   true).FirstOrDefault() as Button;
+            var btnAnalizar= this.Controls.Find("btnAnalizar",true).FirstOrDefault() as Button;
             var btnGuardar = this.Controls.Find("btnGuardar", true).FirstOrDefault() as Button;
             var btnLimpiar = this.Controls.Find("btnLimpiar", true).FirstOrDefault() as Button;
 
-            if (btnAbrir != null) btnAbrir.Click += (s, e) => AbrirArchivo();
+            if (btnAbrir    != null) btnAbrir.Click    += (s, e) => AbrirArchivo();
             if (btnAnalizar != null) btnAnalizar.Click += (s, e) => Analizar();
-            if (btnGuardar != null) btnGuardar.Click += (s, e) => GuardarResultados();
-            if (btnLimpiar != null) btnLimpiar.Click += (s, e) => Limpiar();
+            if (btnGuardar  != null) btnGuardar.Click  += (s, e) => GuardarResultados();
+            if (btnLimpiar  != null) btnLimpiar.Click  += (s, e) => Limpiar();
         }
 
+        // ============================================================
+        // Abrir archivo
+        // ============================================================
         private void AbrirArchivo()
         {
-            OpenFileDialog openFile = new OpenFileDialog();
-            openFile.Filter = "Archivos de texto (*.txt)|*.txt|Todos los archivos (*.*)|*.*";
-            openFile.Title = "Seleccionar archivo de ensamblador SIC/XE";
-
-            if (openFile.ShowDialog() == DialogResult.OK) //mostramos el dialog y esperamos respuesta del usuario
+            var dlg = new OpenFileDialog
             {
-                rutaArchivoActual = openFile.FileName;
-                // buscamos el TextBox para mostrar la ruta del archivo y lo actualizamos
-                var txtRuta = this.Controls.Find("txtRutaArchivo", true).FirstOrDefault() as TextBox;
-                if (txtRuta != null)
-                    txtRuta.Text = rutaArchivoActual;
-                
-                try
-                {
-                    //leemos el contenido del archivo y lo mostramos en el TextBox de entrada
-                    string contenido = File.ReadAllText(rutaArchivoActual, Encoding.UTF8);
-                    var txtEntrada = this.Controls.Find("txtEntrada", true).FirstOrDefault() as TextBox;
-                    if (txtEntrada != null)
-                        txtEntrada.Text = contenido;
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error al cargar archivo: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                Filter = "Archivos de texto (*.txt)|*.txt|Todos los archivos (*.*)|*.*",
+                Title  = "Seleccionar archivo de ensamblador SIC/XE"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+
+            rutaArchivoActual = dlg.FileName;
+            var txtRuta = this.Controls.Find("txtRutaArchivo", true).FirstOrDefault() as TextBox;
+            if (txtRuta != null) txtRuta.Text = rutaArchivoActual;
+
+            try
+            {
+                string contenido = File.ReadAllText(rutaArchivoActual, Encoding.UTF8);
+                var txtEntrada = this.Controls.Find("txtEntrada", true).FirstOrDefault() as TextBox;
+                if (txtEntrada != null) txtEntrada.Text = contenido;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar archivo: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // ============================================================
+        // Analizar
+        // ============================================================
         private void Analizar()
         {
-            //jalo el texto del TextBox de entrada para analizarlo, si no hay texto muestro un mensaje de advertencia
             var txtEntrada = this.Controls.Find("txtEntrada", true).FirstOrDefault() as TextBox;
             if (txtEntrada == null || string.IsNullOrWhiteSpace(txtEntrada.Text))
             {
-                MessageBox.Show("Por favor ingrese código o cargue un archivo", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Por favor ingrese código o cargue un archivo", "Advertencia",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             try
             {
-                //encontramos el DataGridView y el ListBox para mostrar resultados y errores, y los limpiamos antes de analizar
-                var dgv = this.Controls.Find("dgvResultados", true).FirstOrDefault() as DataGridView;
-                var lstErrores = this.Controls.Find("lstErrores", true).FirstOrDefault() as ListBox;
-                
-                if (dgv != null) dgv.Rows.Clear();
-                if (lstErrores != null) lstErrores.Items.Clear();
+                var dgv       = this.Controls.Find("dgvResultados", true).FirstOrDefault() as DataGridView;
+                var lstErrores= this.Controls.Find("lstErrores",    true).FirstOrDefault() as ListBox;
 
-                //llamo al analizador para procesar el texto del TextBox de entrada
+                if (dgv       != null) dgv.Rows.Clear();
+                if (lstErrores!= null) lstErrores.Items.Clear();
+
                 analizador.Analizar(txtEntrada.Text);
 
                 MostrarResultadosEnTabla(dgv);
                 MostrarErrores(lstErrores);
 
-                //muestro un mensaje indicando si el análisis se completó con o sin errores
-                if (!analizador.HayErrores())
-                {
-                    MessageBox.Show(" Análisis completado sin errores", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    MessageBox.Show($" Análisis completado con {analizador.ObtenerErrores().Count} errores", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
+                int inicio = analizador.ObtenerContadorInicio();
+                int final  = analizador.ObtenerContadorFinal();
+                int tam    = analizador.ObtenerTamanioProgramaTotal();
+
+                MessageBox.Show(
+                    $"Contador Inicial (START): 0x{inicio:X4}\n" +
+                    $"Contador Final:           0x{final:X4}\n" +
+                    $"Tamaño Total del Programa: {tam} bytes (0x{tam:X4})",
+                    "Información del Programa");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error durante el análisis: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error durante el análisis: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // ============================================================
+        // Mostrar resultados en DataGridView
+        // ============================================================
         private void MostrarResultadosEnTabla(DataGridView? dgv)
         {
-            if (dgv == null)//si no encuentro el DataGridView, salgo del método
-                return;
+            if (dgv == null) return;
 
-            var lineas = analizador.ObtenerLineasProcesadas(); //obtengo las líneas procesadas del analizador
+            var lineas = analizador.ObtenerLineasProcesadas();
 
-            foreach (var linea in lineas)  //recorro cada línea procesada para mostrarla en la tabla
+            foreach (var linea in lineas)
             {
-                if (string.IsNullOrEmpty(linea.Operacion))//en caso de ser una línea vacía o sin operación, la salto y no la muestro en la tabla
-                    continue;
+                if (string.IsNullOrEmpty(linea.Operacion)) continue;
 
-                //checo el formato para imprimirlo en tabla
-                string formato = DeterminarFormato(linea.Operacion); 
+                // Columna "Estado/Errores": muestra el mensaje de error del paso 2
+                // o los errores léxicos/sintácticos, o vacío si todo OK
+                string estadoTexto = "";
+                if (linea.Errores.Count > 0)
+                    estadoTexto = string.Join("; ", linea.Errores);
+                else if (!string.IsNullOrEmpty(linea.ErrorMessage))
+                    estadoTexto = linea.ErrorMessage;
 
-                //agrego una nueva fila a la tabla con los datos de la línea procesada
+                // Formato mostrado: "---" para directivas (la línea ya trae "---")
+                string fmtDisplay = linea.Formato == "---" ? "---" : linea.Formato;
+
                 int rowIndex = dgv.Rows.Add(
-                    linea.NumeroLinea,
-                    linea.Contador,
-                    linea.Etiqueta,
-                    linea.Operacion,
-                    linea.Operandos,
-                    formato,
-                    linea.Valida ? "Correcto" : "Error"//imprimo correct solo para no dejarlo vacio, pero lo puedo quitar
+                    linea.NumeroLinea,           // 0: Nº
+                    fmtDisplay,                  // 1: Formato
+                    linea.Contador,              // 2: CP
+                    linea.Etiqueta,              // 3: Etiqueta
+                    linea.Operacion,             // 4: Instrucción
+                    linea.Operandos,             // 5: Operandos
+                    DeterminarModo(linea),       // 6: Modo
+                    linea.CodigoObjeto,          // 7: Cod. Objeto
+                    estadoTexto                  // 8: Estado/Errores
                 );
 
-                //cambio el color de fondo de la fila si es correcto o incorrecto
                 DataGridViewRow row = dgv.Rows[rowIndex];
-                if (linea.Valida)
-                {
-                    row.DefaultCellStyle.BackColor = Color.LightGreen;
-                    row.DefaultCellStyle.ForeColor = Color.DarkGreen;
-                }
-                else
+
+                bool tieneError = linea.Errores.Count > 0
+                    || (!string.IsNullOrEmpty(linea.ErrorMessage)
+                        && linea.ErrorMessage.Contains("Error"));
+
+                if (tieneError)
                 {
                     row.DefaultCellStyle.BackColor = Color.LightCoral;
                     row.DefaultCellStyle.ForeColor = Color.DarkRed;
                 }
-
-                //solo en caso de errores
-                if (linea.Errores.Count > 0)
+                else
                 {
-                    string erroresTexto = string.Join("\n", linea.Errores);
-                    row.Cells["Estado"].ToolTipText = erroresTexto;
+                    row.DefaultCellStyle.BackColor = Color.White;
+                    row.DefaultCellStyle.ForeColor = Color.Black;
                 }
             }
         }
 
-        //aqui checamos el formato de la operación para mostrarlo en la tabla
-        private string DeterminarFormato(string operacion)
+        // ============================================================
+        // Determinar modo de direccionamiento
+        // ============================================================
+        private string DeterminarModo(LineaProcesada linea)
         {
-            operacion = operacion.ToUpper();
-            if (operacion.StartsWith("+"))
-                operacion = operacion.Substring(1);
+            string fmt = linea.Formato;
+            if (fmt == "---" || fmt == "1" || fmt == "2") return "---";
+            if (string.IsNullOrEmpty(linea.Operandos))     return "---";
 
-            if (new[] { "FIX", "FLOAT", "HIO", "NORM", "SIO", "TIO" }.Contains(operacion))
-                return "1";
-
-            if (new[] { "ADDR", "CLEAR", "COMPR", "DIVR", "MULR", "RMO", "SHIFTL", "SUBR", "SVC", "TIXR" }.Contains(operacion))
-                return "2";
-
-            if (new[] { "ADD", "ADDF", "AND", "COMP", "COMPF", "DIV", "DIVF", "J", "JEQ", "JGT", "JLT", "JSUB", 
-                       "LDA", "LDB", "LDCH", "LDF", "LDL", "LDS", "LDT", "LDX", "LPS", "MUL", "MULF", "OR", 
-                       "RD", "RSUB", "SSK", "STA", "STB", "STCH", "STF", "STI", "STL", "STS", "STSW", "STT", 
-                       "STX", "SUB", "SUBF", "TD", "TIX", "WD" }.Contains(operacion))
-                return "3/4";
-
-            if (new[] { "START", "END", "BASE", "BYTE", "RESB", "RESW", "WORD" }.Contains(operacion))
-                return "Directiva";
-
-            return "?"; // quitaar esto :p
+            string op = linea.Operandos;
+            if (op.StartsWith("@"))                               return "Indirecto";
+            if (op.StartsWith("#"))                               return "Inmediato";
+            if (op.EndsWith(",X", StringComparison.OrdinalIgnoreCase)) return "Indexado";
+            return "Simple";
         }
 
-        //mando un mensaje en un listbox 
+        // ============================================================
+        // Mostrar errores en ListBox
+        // ============================================================
         private void MostrarErrores(ListBox? lst)
         {
-            if (lst == null)//si la lista de errores no existe, salgo del método
-                return;
+            if (lst == null) return;
+            lst.Items.Clear();
 
-            //jalo los errores del analizador para checar si hay
-            var errores = analizador.ObtenerErrores();
+            var lineas    = analizador.ObtenerLineasProcesadas();
+            bool huboErr  = false;
 
-            if (errores.Count == 0)
+            foreach (var linea in lineas)
             {
-                lst.Items.Add("Sin errores");
-                return;
+                if (linea.Errores.Count > 0)
+                {
+                    foreach (var err in linea.Errores)
+                        lst.Items.Add($"Línea {linea.NumeroLinea} [{linea.Operacion}]: {err}");
+                    huboErr = true;
+                }
+                if (!string.IsNullOrEmpty(linea.ErrorMessage)
+                    && linea.ErrorMessage.Contains("Error"))
+                {
+                    lst.Items.Add($"Línea {linea.NumeroLinea} [{linea.Operacion}]: {linea.ErrorMessage}");
+                    huboErr = true;
+                }
             }
 
-            //imprimo los errores
-            foreach (var error in errores)
-            {
-                lst.Items.Add(error);
-            }
+            if (!huboErr)
+                lst.Items.Add("✓ Análisis finalizado: No se encontraron errores.");
         }
 
+        // ============================================================
+        // Guardar resultados
+        // ============================================================
         private void GuardarResultados()
         {
-            //esto es para evitar que el usuario intente guardar sin haber analizado un archivo
             if (analizador.ObtenerLineasProcesadas().Count == 0)
             {
-                MessageBox.Show("Primero debes analizar un archivo", "Advertencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Primero debes analizar un archivo", "Advertencia",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            //muestro un SaveFileDialog para que el usuario elija dónde guardar el archivo de resultados, con un nombre sugerido basado en el archivo actual
-            SaveFileDialog saveFile = new SaveFileDialog();
-            saveFile.Filter = "Archivos de texto (*.txt)|*.txt";
-            saveFile.Title = "Guardar resultados del análisis";
-            saveFile.FileName = !string.IsNullOrEmpty(rutaArchivoActual) 
-                ? Path.GetFileNameWithoutExtension(rutaArchivoActual) + "_analisis.txt"
-                : "analisis.txt";
-
-            if (saveFile.ShowDialog() == DialogResult.OK)
+            var dlg = new SaveFileDialog
             {
-                try
+                Filter   = "Archivos de texto (*.txt)|*.txt",
+                Title    = "Guardar resultados del análisis",
+                FileName = !string.IsNullOrEmpty(rutaArchivoActual)
+                    ? Path.GetFileNameWithoutExtension(rutaArchivoActual) + "_analisis.txt"
+                    : "analisis.txt"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+
+            try
+            {
+                var sb           = new StringBuilder();
+                var lineas       = analizador.ObtenerLineasProcesadas();
+                var tablaSimbolos= analizador.ObtenerTablaSimbolos();
+                int inicio       = analizador.ObtenerContadorInicio();
+                int final        = analizador.ObtenerContadorFinal();
+                int tam          = analizador.ObtenerTamanioProgramaTotal();
+
+                sb.AppendLine("═════════════════════════════════════════════════════════════");
+                sb.AppendLine("ANÁLISIS DE ENSAMBLADOR SIC/XE");
+                sb.AppendLine("═════════════════════════════════════════════════════════════\n");
+                sb.AppendLine($"START: 0x{inicio:X4}   Final: 0x{final:X4}   Tamaño: {tam} bytes\n");
+
+                sb.AppendLine("Nº | FMT | CP   | ETIQ     | INSTR       | OPERANDOS   | MODO      | COD.OBJ        | ERRORES");
+                sb.AppendLine("───┼─────┼──────┼──────────┼─────────────┼─────────────┼───────────┼────────────────┼────────");
+
+                foreach (var l in lineas)
                 {
-                    //necesito un string builder construir el texto
-                    var sb = new StringBuilder();
-                    //obtengo las lineas analizadas
-                    var lineas = analizador.ObtenerLineasProcesadas();
-                    var errores = analizador.ObtenerErrores();
-                    var tablaSimbolos = analizador.ObtenerTablaSimbolos();
-
-                    //armo una estructura de archivo bonitasss
-                    sb.AppendLine("═══════════════════════════════════════════════════════════════════════════════════════");
-                    sb.AppendLine("ANÁLISIS DE ENSAMBLADOR SIC/XE");
-                    sb.AppendLine("═══════════════════════════════════════════════════════════════════════════════════════\n");
-
-                    // imprimo tipo tabla tambien, pero si quiere solo texto lo puedo quitar
-                    sb.AppendLine("Nº LÍNEA | CONTADOR | ETIQUETA | INSTRUCCIÓN | OPERANDOS | FORMATO | ESTADO");
-                    sb.AppendLine("─────────┼──────────┼──────────┼─────────────┼───────────┼─────────┼─────────");
-
-                    //recorremos por linea y lo agregamos
-                    foreach (var linea in lineas)
-                    {
-                        if (string.IsNullOrEmpty(linea.Operacion))
-                            continue;
-
-                        string formato = DeterminarFormato(linea.Operacion);
-                        string estado = linea.Valida ? "Correcto" : "Error";
-                        
-                        //agregamos la linea formateada, tengo que cambiarlo se ve feo.
-                        sb.AppendLine($"{linea.NumeroLinea,-7} | {linea.Contador,-8} | {linea.Etiqueta,-8} | {linea.Operacion,-11} | {linea.Operandos,-9} | {formato,-7} | {estado,-7}");
-                        
-                        //un append extra para los errores que saque de internet, pero se ve feo, lo puedo mejorar
-                        if (linea.Errores.Count > 0)
-                        {
-                            foreach (var error in linea.Errores)
-                                sb.AppendLine($"  └─ {error}");
-                        }
-                    }
-
-                    //imprimimos la tabla de simbolos
-                    if (tablaSimbolos.Count > 0)
-                    {
-                        sb.AppendLine("\n═══════════════════════════════════════════════════════════════════════════════════════");
-                        sb.AppendLine("TABLA DE SÍMBOLOS");
-                        sb.AppendLine("─────────────────────────────────────────────────────────────────────────────────────");
-                        sb.AppendLine("SÍMBOLO          | DIRECCIÓN");
-                        sb.AppendLine("─────────────────┼──────────");
-
-                        //agregamos cada simbolo ordenado por direccion
-                        foreach (var simbolo in tablaSimbolos.OrderBy(x => x.Value))
-                        {
-                            sb.AppendLine($"{simbolo.Key,-16} | {simbolo.Value,-8}");
-                        }
-                    }
-
-                    //esto fue agregado a peticion de uno de mis compañeros de salon para checar un overview general
-                    sb.AppendLine("\n═══════════════════════════════════════════════════════════════════════════════════════");
-                    sb.AppendLine($"RESUMEN: Total {lineas.Count} líneas, {errores.Count} errores");
-                    sb.AppendLine("═══════════════════════════════════════════════════════════════════════════════════════");
-
-                    //ahora si lo guardamos en el archivo seleccionado
-                    File.WriteAllText(saveFile.FileName, sb.ToString(), Encoding.UTF8);
-                    MessageBox.Show($"Resultados guardados en:\n{saveFile.FileName}", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    if (string.IsNullOrEmpty(l.Operacion)) continue;
+                    string err = l.Errores.Count > 0
+                        ? string.Join("; ", l.Errores)
+                        : l.ErrorMessage ?? "";
+                    string fmt = l.Formato == "---" ? "---" : l.Formato;
+                    sb.AppendLine(
+                        $"{l.NumeroLinea,-3}| {fmt,-4}| {l.Contador,-5}| {l.Etiqueta,-8} | " +
+                        $"{l.Operacion,-11} | {l.Operandos,-11} | {DeterminarModo(l),-9} | " +
+                        $"{l.CodigoObjeto,-14} | {err}");
                 }
-                catch (Exception ex)
+
+                if (tablaSimbolos.Count > 0)
                 {
-                    MessageBox.Show($"Error al guardar: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    sb.AppendLine("\n═════════════════════════════════════════════");
+                    sb.AppendLine("TABLA DE SÍMBOLOS");
+                    sb.AppendLine("─────────────────┬──────────");
+                    sb.AppendLine("SÍMBOLO          | DIRECCIÓN");
+                    sb.AppendLine("─────────────────┼──────────");
+                    foreach (var kv in tablaSimbolos.OrderBy(x => x.Value))
+                        sb.AppendLine($"{kv.Key,-16} | {kv.Value}");
                 }
+
+                File.WriteAllText(dlg.FileName, sb.ToString(), Encoding.UTF8);
+                MessageBox.Show($"✓ Guardado en:\n{dlg.FileName}", "Éxito",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al guardar: {ex.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // ============================================================
+        // Limpiar
+        // ============================================================
         private void Limpiar()
         {
-            var txtEntrada = this.Controls.Find("txtEntrada", true).FirstOrDefault() as TextBox;
-            var dgv = this.Controls.Find("dgvResultados", true).FirstOrDefault() as DataGridView;
-            var lstErrores = this.Controls.Find("lstErrores", true).FirstOrDefault() as ListBox;
-            var txtRuta = this.Controls.Find("txtRutaArchivo", true).FirstOrDefault() as TextBox;
+            var txtEntrada = this.Controls.Find("txtEntrada",    true).FirstOrDefault() as TextBox;
+            var dgv        = this.Controls.Find("dgvResultados", true).FirstOrDefault() as DataGridView;
+            var lstErrores = this.Controls.Find("lstErrores",    true).FirstOrDefault() as ListBox;
+            var txtRuta    = this.Controls.Find("txtRutaArchivo",true).FirstOrDefault() as TextBox;
 
-            //limpiamos los controles
-            if (txtEntrada != null) txtEntrada.Clear();
-            if (dgv != null) dgv.Rows.Clear();
-            if (lstErrores != null) lstErrores.Items.Clear();
-            if (txtRuta != null) txtRuta.Clear();
-            //reinicializamos el analizador y la ruta del archivo actual
-            analizador = new AnalizadorSicXe();
+            txtEntrada?.Clear();
+            dgv?.Rows.Clear();
+            lstErrores?.Items.Clear();
+            txtRuta?.Clear();
+
+            analizador        = new AnalizadorSicXe();
             rutaArchivoActual = "";
+
+            MessageBox.Show("✓ Interfaz limpiada", "Información",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

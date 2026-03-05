@@ -8,6 +8,21 @@
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
         /// </summary>
@@ -30,14 +45,12 @@
             panelSuperior.BackColor = System.Drawing.Color.LightGray;
             panelSuperior.Padding = new System.Windows.Forms.Padding(10);
 
-            // Label "Archivo:"
             System.Windows.Forms.Label lblArchivo = new System.Windows.Forms.Label();
             lblArchivo.Text = "Archivo:";
-            lblArchivo.AutoSize = true; // Ajustar tamaño al texto
-            lblArchivo.Location = new System.Drawing.Point(6, 12); // posicion de la etiqueta x=6 y=12
+            lblArchivo.AutoSize = true;
+            lblArchivo.Location = new System.Drawing.Point(6, 12);
             lblArchivo.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
 
-            // TextBox para ruta del archivo
             System.Windows.Forms.TextBox txtRutaArchivo = new System.Windows.Forms.TextBox();
             txtRutaArchivo.Name = "txtRutaArchivo";
             txtRutaArchivo.Location = new System.Drawing.Point(72, 10);
@@ -46,7 +59,6 @@
             txtRutaArchivo.ReadOnly = true;
             txtRutaArchivo.Font = new System.Drawing.Font("Courier New", 9);
 
-            // Botón Abrir
             System.Windows.Forms.Button btnAbrir = new System.Windows.Forms.Button();
             btnAbrir.Name = "btnAbrir";
             btnAbrir.Text = "Abrir Documento";
@@ -54,9 +66,8 @@
             btnAbrir.Width = 80;
             btnAbrir.Height = 25;
             btnAbrir.Font = new System.Drawing.Font("Arial", 9);
-            btnAbrir.Cursor = System.Windows.Forms.Cursors.Hand; // cursor de manita al pasar sobre el botón
+            btnAbrir.Cursor = System.Windows.Forms.Cursors.Hand;
 
-            // Botón Analizar
             System.Windows.Forms.Button btnAnalizar = new System.Windows.Forms.Button();
             btnAnalizar.Name = "btnAnalizar";
             btnAnalizar.Text = "Analizar";
@@ -68,7 +79,6 @@
             btnAnalizar.ForeColor = System.Drawing.Color.White;
             btnAnalizar.Cursor = System.Windows.Forms.Cursors.Hand;
 
-            // Botón Guardar
             System.Windows.Forms.Button btnGuardar = new System.Windows.Forms.Button();
             btnGuardar.Name = "btnGuardar";
             btnGuardar.Text = "Guardar Documento";
@@ -78,7 +88,6 @@
             btnGuardar.Font = new System.Drawing.Font("Arial", 9);
             btnGuardar.Cursor = System.Windows.Forms.Cursors.Hand;
 
-            // Botón Limpiar
             System.Windows.Forms.Button btnLimpiar = new System.Windows.Forms.Button();
             btnLimpiar.Name = "btnLimpiar";
             btnLimpiar.Text = "Limpiar";
@@ -89,7 +98,6 @@
             btnLimpiar.BackColor = System.Drawing.Color.Orange;
             btnLimpiar.Cursor = System.Windows.Forms.Cursors.Hand;
 
-            // Agregar controles al panel superior
             panelSuperior.Controls.Add(lblArchivo);
             panelSuperior.Controls.Add(txtRutaArchivo);
             panelSuperior.Controls.Add(btnAbrir);
@@ -103,7 +111,7 @@
             
             System.Windows.Forms.SplitContainer splitPrincipal = new System.Windows.Forms.SplitContainer();
             splitPrincipal.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitPrincipal.SplitterDistance = 60; // Ajustar el tamaño del panel izquierdo
+            splitPrincipal.SplitterDistance = 60;
             splitPrincipal.Orientation = System.Windows.Forms.Orientation.Vertical;
 
             // ============================================================================
@@ -132,7 +140,7 @@
             txtEntrada.Font = new System.Drawing.Font("Courier New", 10);
             txtEntrada.WordWrap = false;
             txtEntrada.AcceptsTab = true;
-            txtEntrada.Text = "SUM\tSTART\t0"; // Texto de ejemplo
+            txtEntrada.Text = "";
 
             panelCodigo.Controls.Add(txtEntrada);
             panelCodigo.Controls.Add(lblCodigo);
@@ -146,7 +154,7 @@
             splitDerecho.SplitterDistance = 400;
             splitDerecho.Orientation = System.Windows.Forms.Orientation.Horizontal;
 
-            // Panel superior derecho - Resultados (CON DATATABLE)
+            // Panel superior derecho - Resultados
             System.Windows.Forms.Panel panelResultados = new System.Windows.Forms.Panel();
             panelResultados.Dock = System.Windows.Forms.DockStyle.Fill;
             panelResultados.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -161,7 +169,9 @@
             lblResultados.Padding = new System.Windows.Forms.Padding(5);
             lblResultados.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
-            // DataGridView - TABLA DE RESULTADOS
+            // ============================================================================
+            // DataGridView - TABLA DE RESULTADOS (9 COLUMNAS)
+            // ============================================================================
             System.Windows.Forms.DataGridView dgvResultados = new System.Windows.Forms.DataGridView();
             dgvResultados.Name = "dgvResultados";
             dgvResultados.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -176,23 +186,29 @@
             dgvResultados.BackgroundColor = System.Drawing.Color.White;
             dgvResultados.GridColor = System.Drawing.Color.LightGray;
 
-            // Agregar columnas a la tabla
-            dgvResultados.Columns.Add("NumLinea", "Nº Línea");
+            // ============================================================================
+            // AGREGAR COLUMNAS CORRECTAMENTE (9 columnas)
+            // ============================================================================
+            dgvResultados.Columns.Add("Num", "Num");
+            dgvResultados.Columns.Add("Formato", "Formato");
             dgvResultados.Columns.Add("Contador", "Contador");
             dgvResultados.Columns.Add("Etiqueta", "Etiqueta");
             dgvResultados.Columns.Add("Instruccion", "Instrucción");
             dgvResultados.Columns.Add("Operadores", "Operandos");
-            dgvResultados.Columns.Add("Formato", "Formato");
+            dgvResultados.Columns.Add("Modo", "Modo");
+            dgvResultados.Columns.Add("CodigoObjeto", "Cod.Objeto");
             dgvResultados.Columns.Add("Estado", "Estado");
 
             // Ajustar ancho de columnas
-            dgvResultados.Columns["NumLinea"].Width = 60;
+            dgvResultados.Columns["Num"].Width = 50;
+            dgvResultados.Columns["Formato"].Width = 80;
             dgvResultados.Columns["Contador"].Width = 80;
             dgvResultados.Columns["Etiqueta"].Width = 100;
             dgvResultados.Columns["Instruccion"].Width = 100;
-            dgvResultados.Columns["Operadores"].Width = 150;
-            dgvResultados.Columns["Formato"].Width = 70;
-            dgvResultados.Columns["Estado"].Width = 100;
+            dgvResultados.Columns["Operadores"].Width = 100;
+            dgvResultados.Columns["Modo"].Width = 100;
+            dgvResultados.Columns["CodigoObjeto"].Width = 120;
+            dgvResultados.Columns["Estado"].Width = 150;
 
             panelResultados.Controls.Add(dgvResultados);
             panelResultados.Controls.Add(lblResultados);
@@ -236,8 +252,6 @@
             this.Controls.Add(splitPrincipal);
             this.Controls.Add(panelSuperior);
         }
-
-        #region Component Designer generated code
 
         #endregion
     }

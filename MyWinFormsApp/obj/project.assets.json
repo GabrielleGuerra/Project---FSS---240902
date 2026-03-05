@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Gabrielle\\Documents\\Fund-SW-Sis\\Project---FSS---240902\\MyWinFormsApp\\MyWinFormsApp.csproj",
+      "projectUniqueName": "C:\\Users\\Gabrielle\\Documents\\FSS-GuerraGomez\\Project---FSS---240902\\MyWinFormsApp\\MyWinFormsApp.csproj",
       "projectName": "MyWinFormsApp",
-      "projectPath": "C:\\Users\\Gabrielle\\Documents\\Fund-SW-Sis\\Project---FSS---240902\\MyWinFormsApp\\MyWinFormsApp.csproj",
+      "projectPath": "C:\\Users\\Gabrielle\\Documents\\FSS-GuerraGomez\\Project---FSS---240902\\MyWinFormsApp\\MyWinFormsApp.csproj",
       "packagesPath": "C:\\Users\\Gabrielle\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Gabrielle\\Documents\\Fund-SW-Sis\\Project---FSS---240902\\MyWinFormsApp\\obj\\",
+      "outputPath": "C:\\Users\\Gabrielle\\Documents\\FSS-GuerraGomez\\Project---FSS---240902\\MyWinFormsApp\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\Gabrielle\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -68,7 +68,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.103/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",
