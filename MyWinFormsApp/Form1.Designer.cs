@@ -3,14 +3,14 @@
     partial class Form1
     {
         /// <summary>
-        /// Required designer variable.
+        /// Variable del diseñador necesaria.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
-        /// Clean up any resources being used.
+        /// Limpiar los recursos que se estén usando.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name="disposing">true si los recursos administrados se deben desechar; false en caso contrario.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -20,17 +20,17 @@
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+        #region Código generado por el Diseñador de Windows Forms
 
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        /// Método necesario para admitir el Diseñador. No se puede modificar
+        /// el contenido de este método con el editor de código.
         /// </summary>
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1400, 900);
+            this.ClientSize = new System.Drawing.Size(1865, 750);
             this.Text = "Analizador de Ensamblador SIC/XE";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.WindowState = System.Windows.Forms.FormWindowState.Normal;
@@ -38,86 +38,148 @@
             // ============================================================================
             // PANEL SUPERIOR - CONTROLES
             // ============================================================================
-            
+
             System.Windows.Forms.Panel panelSuperior = new System.Windows.Forms.Panel();
             panelSuperior.Dock = System.Windows.Forms.DockStyle.Top;
             panelSuperior.Height = 70;
             panelSuperior.BackColor = System.Drawing.Color.LightGray;
             panelSuperior.Padding = new System.Windows.Forms.Padding(10);
 
+            // Etiqueta ruta archivo
             System.Windows.Forms.Label lblArchivo = new System.Windows.Forms.Label();
             lblArchivo.Text = "Archivo:";
             lblArchivo.AutoSize = true;
-            lblArchivo.Location = new System.Drawing.Point(6, 12);
+            lblArchivo.Location = new System.Drawing.Point(6, 22);
             lblArchivo.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
 
+            // TextBox ruta (solo visual, no tiene lógica propia)
             System.Windows.Forms.TextBox txtRutaArchivo = new System.Windows.Forms.TextBox();
             txtRutaArchivo.Name = "txtRutaArchivo";
-            txtRutaArchivo.Location = new System.Drawing.Point(72, 10);
-            txtRutaArchivo.Width = 700;
-            txtRutaArchivo.Height = 25;
+            txtRutaArchivo.Location = new System.Drawing.Point(75, 20);
+            txtRutaArchivo.Width = 500;
+            txtRutaArchivo.Height = 28;
             txtRutaArchivo.ReadOnly = true;
             txtRutaArchivo.Font = new System.Drawing.Font("Courier New", 9);
 
-            System.Windows.Forms.Button btnAbrir = new System.Windows.Forms.Button();
-            btnAbrir.Name = "btnAbrir";
-            btnAbrir.Text = "Abrir Documento";
-            btnAbrir.Location = new System.Drawing.Point(780, 10);
-            btnAbrir.Width = 80;
-            btnAbrir.Height = 25;
-            btnAbrir.Font = new System.Drawing.Font("Arial", 9);
-            btnAbrir.Cursor = System.Windows.Forms.Cursors.Hand;
+            // Cargar Archivo
+            this.cargarArchivo = new System.Windows.Forms.Button();
+            this.cargarArchivo.Name = "cargarArchivo";
+            this.cargarArchivo.Text = "Cargar Archivo";
+            this.cargarArchivo.Location = new System.Drawing.Point(585, 15);
+            this.cargarArchivo.Size = new System.Drawing.Size(120, 40);
+            this.cargarArchivo.Font = new System.Drawing.Font("Arial", 9);
+            this.cargarArchivo.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.cargarArchivo.Click += new System.EventHandler(this.cargarArchivo_Click);
 
-            System.Windows.Forms.Button btnAnalizar = new System.Windows.Forms.Button();
-            btnAnalizar.Name = "btnAnalizar";
-            btnAnalizar.Text = "Analizar";
-            btnAnalizar.Location = new System.Drawing.Point(870, 10);
-            btnAnalizar.Width = 100;
-            btnAnalizar.Height = 25;
-            btnAnalizar.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
-            btnAnalizar.BackColor = System.Drawing.Color.LimeGreen;
-            btnAnalizar.ForeColor = System.Drawing.Color.White;
-            btnAnalizar.Cursor = System.Windows.Forms.Cursors.Hand;
+            // Checar Sintaxis
+            this.checarSintax = new System.Windows.Forms.Button();
+            this.checarSintax.Name = "checarSintax";
+            this.checarSintax.Text = "Checar Sintaxis";
+            this.checarSintax.Location = new System.Drawing.Point(715, 15);
+            this.checarSintax.Size = new System.Drawing.Size(120, 40);
+            this.checarSintax.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            this.checarSintax.BackColor = System.Drawing.Color.LimeGreen;
+            this.checarSintax.ForeColor = System.Drawing.Color.White;
+            this.checarSintax.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.checarSintax.Click += new System.EventHandler(this.checarSintax_Click);
 
-            System.Windows.Forms.Button btnGuardar = new System.Windows.Forms.Button();
-            btnGuardar.Name = "btnGuardar";
-            btnGuardar.Text = "Guardar Documento";
-            btnGuardar.Location = new System.Drawing.Point(980, 10);
-            btnGuardar.Width = 100;
-            btnGuardar.Height = 25;
-            btnGuardar.Font = new System.Drawing.Font("Arial", 9);
-            btnGuardar.Cursor = System.Windows.Forms.Cursors.Hand;
+            // tabla → Generar TABSIM (lógica: tabla_Click)
+            this.tabla = new System.Windows.Forms.Button();
+            this.tabla.Name = "tabla";
+            this.tabla.Text = "Generar TABSIM";
+            this.tabla.Location = new System.Drawing.Point(845, 15);
+            this.tabla.Size = new System.Drawing.Size(140, 40);
+            this.tabla.Font = new System.Drawing.Font("Arial", 9);
+            this.tabla.BackColor = System.Drawing.Color.SteelBlue;
+            this.tabla.ForeColor = System.Drawing.Color.White;
+            this.tabla.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.tabla.Click += new System.EventHandler(this.tabla_Click);
 
+            // Generar Codigo Objeto
+            this.CodigoObj = new System.Windows.Forms.Button();
+            this.CodigoObj.Name = "CodigoObj";
+            this.CodigoObj.Text = "Generar Codigo Objeto";
+            this.CodigoObj.Location = new System.Drawing.Point(995, 15);
+            this.CodigoObj.Size = new System.Drawing.Size(140, 40);
+            this.CodigoObj.Font = new System.Drawing.Font("Arial", 9);
+            this.CodigoObj.BackColor = System.Drawing.Color.DarkOrange;
+            this.CodigoObj.ForeColor = System.Drawing.Color.White;
+            this.CodigoObj.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.CodigoObj.Click += new System.EventHandler(this.CodigoObj_Click);
+
+            //FileGenerattor → Generar FILE (lógica: FileGenerattor_Click)
+            this.FileGenerattor = new System.Windows.Forms.Button();
+            this.FileGenerattor.Name = "FileGenerattor";
+            this.FileGenerattor.Text = "Generar Programa Objeto";
+            this.FileGenerattor.Location = new System.Drawing.Point(1145, 15);
+            this.FileGenerattor.Size = new System.Drawing.Size(120, 40);
+            this.FileGenerattor.Font = new System.Drawing.Font("Arial", 9);
+            this.FileGenerattor.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.FileGenerattor.Click += new System.EventHandler(this.FileGenerattor_Click);
+            
+            // Botón Limpiar Limpia UI
             System.Windows.Forms.Button btnLimpiar = new System.Windows.Forms.Button();
             btnLimpiar.Name = "btnLimpiar";
             btnLimpiar.Text = "Limpiar";
-            btnLimpiar.Location = new System.Drawing.Point(1090, 10);
-            btnLimpiar.Width = 100;
-            btnLimpiar.Height = 25;
+            btnLimpiar.Location = new System.Drawing.Point(1275, 15);
+            btnLimpiar.Size = new System.Drawing.Size(100, 40);
             btnLimpiar.Font = new System.Drawing.Font("Arial", 9);
             btnLimpiar.BackColor = System.Drawing.Color.Orange;
+            btnLimpiar.ForeColor = System.Drawing.Color.White;
             btnLimpiar.Cursor = System.Windows.Forms.Cursors.Hand;
+            btnLimpiar.Click += new System.EventHandler((s, ev) =>
+            {
+                rtbCode.Clear();
+                rtbErrors.Clear();
+                TablaSimbolos_Panel.Rows.Clear();
+                panelResultados.Rows.Clear();
+                txtRutaArchivo.Clear();
+                numTamProg.Text = "0H";
+            });
+
+            // label Tamaño del programa
+            this.tamProg = new System.Windows.Forms.Label();
+            this.tamProg.AutoSize = true;
+            this.tamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+            this.tamProg.Location = new System.Drawing.Point(1390, 22);
+            this.tamProg.Text = "Tamaño del programa:";
+
+            this.numTamProg = new System.Windows.Forms.Label();
+            this.numTamProg.AutoSize = true;
+            this.numTamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+            this.numTamProg.Location = new System.Drawing.Point(1610, 22);
+            this.numTamProg.Text = "0H";
 
             panelSuperior.Controls.Add(lblArchivo);
             panelSuperior.Controls.Add(txtRutaArchivo);
-            panelSuperior.Controls.Add(btnAbrir);
-            panelSuperior.Controls.Add(btnAnalizar);
-            panelSuperior.Controls.Add(btnGuardar);
+            panelSuperior.Controls.Add(this.cargarArchivo);
+            panelSuperior.Controls.Add(this.checarSintax);
+            panelSuperior.Controls.Add(this.tabla);
+            panelSuperior.Controls.Add(this.CodigoObj);
+            panelSuperior.Controls.Add(this.FileGenerattor);
             panelSuperior.Controls.Add(btnLimpiar);
+            panelSuperior.Controls.Add(this.tamProg);
+            panelSuperior.Controls.Add(this.numTamProg);
 
             // ============================================================================
-            // SPLITTER PRINCIPAL
+            // SPLITTER PRINCIPAL (izquierda | derecha)
             // ============================================================================
-            
+
             System.Windows.Forms.SplitContainer splitPrincipal = new System.Windows.Forms.SplitContainer();
             splitPrincipal.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitPrincipal.SplitterDistance = 60;
+            splitPrincipal.SplitterDistance = 8;
             splitPrincipal.Orientation = System.Windows.Forms.Orientation.Vertical;
 
             // ============================================================================
-            // PANEL IZQUIERDO - CÓDIGO FUENTE
+            // PANEL IZQUIERDO: código fuente (rtbCode) + errores (rtbErrors)
             // ============================================================================
-            
+
+            System.Windows.Forms.SplitContainer splitIzquierdo = new System.Windows.Forms.SplitContainer();
+            splitIzquierdo.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitIzquierdo.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            splitIzquierdo.SplitterDistance = 200;
+
+            // Panel código fuente
             System.Windows.Forms.Panel panelCodigo = new System.Windows.Forms.Panel();
             panelCodigo.Dock = System.Windows.Forms.DockStyle.Fill;
             panelCodigo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -125,95 +187,25 @@
             System.Windows.Forms.Label lblCodigo = new System.Windows.Forms.Label();
             lblCodigo.Text = "CÓDIGO FUENTE";
             lblCodigo.Dock = System.Windows.Forms.DockStyle.Top;
-            lblCodigo.Height = 30;
+            lblCodigo.Height = 28;
             lblCodigo.BackColor = System.Drawing.Color.LightBlue;
             lblCodigo.ForeColor = System.Drawing.Color.DarkBlue;
-            lblCodigo.Font = new System.Drawing.Font("Arial", 11, System.Drawing.FontStyle.Bold);
+            lblCodigo.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
             lblCodigo.Padding = new System.Windows.Forms.Padding(5);
             lblCodigo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
-            System.Windows.Forms.TextBox txtEntrada = new System.Windows.Forms.TextBox();
-            txtEntrada.Name = "txtEntrada";
-            txtEntrada.Dock = System.Windows.Forms.DockStyle.Fill;
-            txtEntrada.Multiline = true;
-            txtEntrada.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            txtEntrada.Font = new System.Drawing.Font("Courier New", 10);
-            txtEntrada.WordWrap = false;
-            txtEntrada.AcceptsTab = true;
-            txtEntrada.Text = "";
+            this.rtbCode = new System.Windows.Forms.RichTextBox();
+            this.rtbCode.Name = "rtbCode";
+            this.rtbCode.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbCode.Font = new System.Drawing.Font("Courier New", 10);
+            this.rtbCode.WordWrap = false;
+            this.rtbCode.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
+            this.rtbCode.Text = "";
 
-            panelCodigo.Controls.Add(txtEntrada);
+            panelCodigo.Controls.Add(this.rtbCode);
             panelCodigo.Controls.Add(lblCodigo);
 
-            // ============================================================================
-            // PANEL DERECHO - DIVIDIDO EN DOS PARTES
-            // ============================================================================
-            
-            System.Windows.Forms.SplitContainer splitDerecho = new System.Windows.Forms.SplitContainer();
-            splitDerecho.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitDerecho.SplitterDistance = 400;
-            splitDerecho.Orientation = System.Windows.Forms.Orientation.Horizontal;
-
-            // Panel superior derecho - Resultados
-            System.Windows.Forms.Panel panelResultados = new System.Windows.Forms.Panel();
-            panelResultados.Dock = System.Windows.Forms.DockStyle.Fill;
-            panelResultados.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            System.Windows.Forms.Label lblResultados = new System.Windows.Forms.Label();
-            lblResultados.Text = "RESULTADOS DEL ANÁLISIS";
-            lblResultados.Dock = System.Windows.Forms.DockStyle.Top;
-            lblResultados.Height = 30;
-            lblResultados.BackColor = System.Drawing.Color.LightGreen;
-            lblResultados.ForeColor = System.Drawing.Color.DarkGreen;
-            lblResultados.Font = new System.Drawing.Font("Arial", 11, System.Drawing.FontStyle.Bold);
-            lblResultados.Padding = new System.Windows.Forms.Padding(5);
-            lblResultados.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-
-            // ============================================================================
-            // DataGridView - TABLA DE RESULTADOS (9 COLUMNAS)
-            // ============================================================================
-            System.Windows.Forms.DataGridView dgvResultados = new System.Windows.Forms.DataGridView();
-            dgvResultados.Name = "dgvResultados";
-            dgvResultados.Dock = System.Windows.Forms.DockStyle.Fill;
-            dgvResultados.AllowUserToAddRows = false;
-            dgvResultados.AllowUserToDeleteRows = false;
-            dgvResultados.AllowUserToOrderColumns = true;
-            dgvResultados.ReadOnly = true;
-            dgvResultados.RowHeadersVisible = true;
-            dgvResultados.RowHeadersWidth = 50;
-            dgvResultados.Font = new System.Drawing.Font("Courier New", 9);
-            dgvResultados.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvResultados.BackgroundColor = System.Drawing.Color.White;
-            dgvResultados.GridColor = System.Drawing.Color.LightGray;
-
-            // ============================================================================
-            // AGREGAR COLUMNAS CORRECTAMENTE (9 columnas)
-            // ============================================================================
-            dgvResultados.Columns.Add("Num", "Num");
-            dgvResultados.Columns.Add("Formato", "Formato");
-            dgvResultados.Columns.Add("Contador", "Contador");
-            dgvResultados.Columns.Add("Etiqueta", "Etiqueta");
-            dgvResultados.Columns.Add("Instruccion", "Instrucción");
-            dgvResultados.Columns.Add("Operadores", "Operandos");
-            dgvResultados.Columns.Add("Modo", "Modo");
-            dgvResultados.Columns.Add("CodigoObjeto", "Cod.Objeto");
-            dgvResultados.Columns.Add("Estado", "Estado");
-
-            // Ajustar ancho de columnas
-            dgvResultados.Columns["Num"].Width = 50;
-            dgvResultados.Columns["Formato"].Width = 80;
-            dgvResultados.Columns["Contador"].Width = 80;
-            dgvResultados.Columns["Etiqueta"].Width = 100;
-            dgvResultados.Columns["Instruccion"].Width = 100;
-            dgvResultados.Columns["Operadores"].Width = 100;
-            dgvResultados.Columns["Modo"].Width = 100;
-            dgvResultados.Columns["CodigoObjeto"].Width = 120;
-            dgvResultados.Columns["Estado"].Width = 150;
-
-            panelResultados.Controls.Add(dgvResultados);
-            panelResultados.Controls.Add(lblResultados);
-
-            // Panel inferior derecho - Errores
+            // Panel errores
             System.Windows.Forms.Panel panelErrores = new System.Windows.Forms.Panel();
             panelErrores.Dock = System.Windows.Forms.DockStyle.Fill;
             panelErrores.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -221,38 +213,241 @@
             System.Windows.Forms.Label lblErrores = new System.Windows.Forms.Label();
             lblErrores.Text = "ERRORES ENCONTRADOS";
             lblErrores.Dock = System.Windows.Forms.DockStyle.Top;
-            lblErrores.Height = 30;
+            lblErrores.Height = 28;
             lblErrores.BackColor = System.Drawing.Color.LightCoral;
             lblErrores.ForeColor = System.Drawing.Color.DarkRed;
-            lblErrores.Font = new System.Drawing.Font("Arial", 11, System.Drawing.FontStyle.Bold);
+            lblErrores.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
             lblErrores.Padding = new System.Windows.Forms.Padding(5);
             lblErrores.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
-            System.Windows.Forms.ListBox lstErrores = new System.Windows.Forms.ListBox();
-            lstErrores.Name = "lstErrores";
-            lstErrores.Dock = System.Windows.Forms.DockStyle.Fill;
-            lstErrores.Font = new System.Drawing.Font("Courier New", 9);
-            lstErrores.ScrollAlwaysVisible = true;
+            this.rtbErrors = new System.Windows.Forms.RichTextBox();
+            this.rtbErrors.Name = "rtbErrors";
+            this.rtbErrors.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbErrors.ReadOnly = true;
+            this.rtbErrors.Font = new System.Drawing.Font("Courier New", 9);
+            this.rtbErrors.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
+            this.rtbErrors.Text = "";
 
-            panelErrores.Controls.Add(lstErrores);
+            panelErrores.Controls.Add(this.rtbErrors);
             panelErrores.Controls.Add(lblErrores);
 
-            // Agregar paneles al splitDerecho
-            splitDerecho.Panel1.Controls.Add(panelResultados);
-            splitDerecho.Panel2.Controls.Add(panelErrores);
+            splitIzquierdo.Panel1.Controls.Add(panelCodigo);
+            splitIzquierdo.Panel2.Controls.Add(panelErrores);
 
-            // Agregar paneles al splitPrincipal
-            splitPrincipal.Panel1.Controls.Add(panelCodigo);
+            // ============================================================================
+            // PANEL DERECHO: TABSIM | tabla de archivo Intermedio
+            // ============================================================================
+
+            System.Windows.Forms.SplitContainer splitDerecho = new System.Windows.Forms.SplitContainer();
+            splitDerecho.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitDerecho.Orientation = System.Windows.Forms.Orientation.Vertical;
+            splitDerecho.SplitterDistance = 30;
+
+            //TABSIM
+            System.Windows.Forms.Panel panelSim = new System.Windows.Forms.Panel();
+            panelSim.Dock = System.Windows.Forms.DockStyle.Fill;
+            panelSim.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+
+            System.Windows.Forms.Label lblSim = new System.Windows.Forms.Label();
+            lblSim.Text = "TABLA DE SÍMBOLOS (TABSIM)";
+            lblSim.Dock = System.Windows.Forms.DockStyle.Top;
+            lblSim.Height = 28;
+            lblSim.BackColor = System.Drawing.Color.LightGreen;
+            lblSim.ForeColor = System.Drawing.Color.DarkGreen;
+            lblSim.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
+            lblSim.Padding = new System.Windows.Forms.Padding(5);
+            lblSim.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+            this.TablaSimbolos_Panel = new System.Windows.Forms.DataGridView();
+            this.Simbolo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Direccion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+
+            ((System.ComponentModel.ISupportInitialize)(this.TablaSimbolos_Panel)).BeginInit();
+
+            this.TablaSimbolos_Panel.Name = "TablaSimbolos_Panel";
+            this.TablaSimbolos_Panel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.TablaSimbolos_Panel.AllowUserToAddRows = false;
+            this.TablaSimbolos_Panel.AllowUserToDeleteRows = false;
+            this.TablaSimbolos_Panel.ReadOnly = true;
+            this.TablaSimbolos_Panel.RowHeadersWidth = 62;
+            this.TablaSimbolos_Panel.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.TablaSimbolos_Panel.Font = new System.Drawing.Font("Courier New", 9);
+            this.TablaSimbolos_Panel.BackgroundColor = System.Drawing.Color.White;
+            this.TablaSimbolos_Panel.GridColor = System.Drawing.Color.LightGray;
+
+            this.Simbolo.HeaderText = "Símbolo";
+            this.Simbolo.Name = "Simbolo";
+            this.Simbolo.ReadOnly = true;
+            this.Simbolo.MinimumWidth = 8;
+            this.Simbolo.Width = 150;
+
+            this.Direccion.HeaderText = "Dirección";
+            this.Direccion.Name = "Direccion";
+            this.Direccion.ReadOnly = true;
+            this.Direccion.MinimumWidth = 8;
+            this.Direccion.Width = 150;
+
+            this.TablaSimbolos_Panel.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+                this.Simbolo,
+                this.Direccion });
+
+            ((System.ComponentModel.ISupportInitialize)(this.TablaSimbolos_Panel)).EndInit();
+
+            panelSim.Controls.Add(this.TablaSimbolos_Panel);
+            panelSim.Controls.Add(lblSim);
+
+            // tabla intermedia / resultados
+            System.Windows.Forms.Panel panelInt = new System.Windows.Forms.Panel();
+            panelInt.Dock = System.Windows.Forms.DockStyle.Fill;
+            panelInt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+
+            System.Windows.Forms.Label lblInt = new System.Windows.Forms.Label();
+            lblInt.Text = "RESULTADOS DEL ANÁLISIS";
+            lblInt.Dock = System.Windows.Forms.DockStyle.Top;
+            lblInt.Height = 28;
+            lblInt.BackColor = System.Drawing.Color.LightSteelBlue;
+            lblInt.ForeColor = System.Drawing.Color.DarkBlue;
+            lblInt.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
+            lblInt.Padding = new System.Windows.Forms.Padding(5);
+            lblInt.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+            this.panelResultados = new System.Windows.Forms.DataGridView();
+            this.Num = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Formato = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ETQ = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.INS = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.OPER = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.MODO = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Obj = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Err = new System.Windows.Forms.DataGridViewTextBoxColumn();
+
+            ((System.ComponentModel.ISupportInitialize)(this.panelResultados)).BeginInit();
+
+            this.panelResultados.Name = "panelResultados";
+            this.panelResultados.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelResultados.AllowUserToAddRows = false;
+            this.panelResultados.AllowUserToDeleteRows = false;
+            this.panelResultados.AllowUserToOrderColumns = true;
+            this.panelResultados.ReadOnly = true;
+            this.panelResultados.RowHeadersWidth = 62;
+            this.panelResultados.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.panelResultados.Font = new System.Drawing.Font("Courier New", 9);
+            this.panelResultados.BackgroundColor = System.Drawing.Color.White;
+            this.panelResultados.GridColor = System.Drawing.Color.LightGray;
+
+            this.Num.HeaderText = "Num";
+            this.Num.Name = "Num";
+            this.Num.ReadOnly = true;
+            this.Num.MinimumWidth = 8;
+            this.Num.Width = 50;
+
+            this.Formato.HeaderText = "Formato";
+            this.Formato.Name = "Formato";
+            this.Formato.ReadOnly = true;
+            this.Formato.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.Formato.MinimumWidth = 8;
+            this.Formato.Width = 105;
+
+            this.CP.HeaderText = "CP";
+            this.CP.Name = "CP";
+            this.CP.ReadOnly = true;
+            this.CP.MinimumWidth = 8;
+            this.CP.Width = 70;
+
+            this.ETQ.HeaderText = "ETQ";
+            this.ETQ.Name = "ETQ";
+            this.ETQ.ReadOnly = true;
+            this.ETQ.MinimumWidth = 8;
+            this.ETQ.Width = 90;
+
+            this.INS.HeaderText = "INS";
+            this.INS.Name = "INS";
+            this.INS.ReadOnly = true;
+            this.INS.MinimumWidth = 8;
+            this.INS.Width = 80;
+
+            this.OPER.HeaderText = "OPER";
+            this.OPER.Name = "OPER";
+            this.OPER.ReadOnly = true;
+            this.OPER.MinimumWidth = 8;
+            this.OPER.Width = 150;
+
+            this.MODO.HeaderText = "MODO";
+            this.MODO.Name = "MODO";
+            this.MODO.ReadOnly = true;
+            this.MODO.MinimumWidth = 8;
+            this.MODO.Width = 218;
+
+            this.Obj.HeaderText = "Objeto";
+            this.Obj.Name = "Obj";
+            this.Obj.ReadOnly = true;
+            this.Obj.MinimumWidth = 8;
+            this.Obj.Width = 150;
+
+            this.Err.HeaderText = "ERR";
+            this.Err.Name = "Err";
+            this.Err.ReadOnly = true;
+            this.Err.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.Err.MinimumWidth = 8;
+            this.Err.Width = 80;
+
+            this.panelResultados.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+                this.Num,
+                this.Formato,
+                this.CP,
+                this.ETQ,
+                this.INS,
+                this.OPER,
+                this.MODO,
+                this.Obj,
+                this.Err });
+
+            ((System.ComponentModel.ISupportInitialize)(this.panelResultados)).EndInit();
+
+            panelInt.Controls.Add(this.panelResultados);
+            panelInt.Controls.Add(lblInt);
+
+            splitDerecho.Panel1.Controls.Add(panelSim);
+            splitDerecho.Panel2.Controls.Add(panelInt);
+
+            // ============================================================================
+            // ENSAMBLAR TODO
+            // ============================================================================
+
+            splitPrincipal.Panel1.Controls.Add(splitIzquierdo);
             splitPrincipal.Panel2.Controls.Add(splitDerecho);
 
-            // ============================================================================
-            // AGREGAR TODO AL FORMULARIO
-            // ============================================================================
-            
             this.Controls.Add(splitPrincipal);
             this.Controls.Add(panelSuperior);
+
+            this.ResumeLayout(false);
+            this.PerformLayout();
         }
 
         #endregion
+
+        private System.Windows.Forms.RichTextBox rtbCode;
+        private System.Windows.Forms.Button cargarArchivo;
+        private System.Windows.Forms.RichTextBox rtbErrors;
+        private System.Windows.Forms.Button checarSintax;
+        private System.Windows.Forms.DataGridView TablaSimbolos_Panel;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Simbolo;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Direccion;
+        private System.Windows.Forms.DataGridView panelResultados;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Num;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Formato;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CP;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ETQ;
+        private System.Windows.Forms.DataGridViewTextBoxColumn INS;
+        private System.Windows.Forms.DataGridViewTextBoxColumn OPER;
+        private System.Windows.Forms.DataGridViewTextBoxColumn MODO;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Obj;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Err;
+        private System.Windows.Forms.Label numTamProg;
+        private System.Windows.Forms.Label tamProg;
+        private System.Windows.Forms.Button tabla;
+        private System.Windows.Forms.Button CodigoObj;
+        private System.Windows.Forms.Button FileGenerattor;
     }
 }
