@@ -261,6 +261,7 @@
             this.TablaSimbolos_Panel = new System.Windows.Forms.DataGridView();
             this.Simbolo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Direccion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TipoTermino = new System.Windows.Forms.DataGridViewTextBoxColumn();
 
             ((System.ComponentModel.ISupportInitialize)(this.TablaSimbolos_Panel)).BeginInit();
 
@@ -287,9 +288,16 @@
             this.Direccion.MinimumWidth = 8;
             this.Direccion.Width = 150;
 
+            this.TipoTermino.HeaderText = "Tipo";
+            this.TipoTermino.Name = "TipoTermino";
+            this.TipoTermino.ReadOnly = true;
+            this.TipoTermino.MinimumWidth = 8;
+            this.TipoTermino.Width = 120;
+
             this.TablaSimbolos_Panel.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
                 this.Simbolo,
-                this.Direccion });
+                this.Direccion,
+                this.TipoTermino });
 
             ((System.ComponentModel.ISupportInitialize)(this.TablaSimbolos_Panel)).EndInit();
 
@@ -434,6 +442,7 @@
         private System.Windows.Forms.DataGridView TablaSimbolos_Panel;
         private System.Windows.Forms.DataGridViewTextBoxColumn Simbolo;
         private System.Windows.Forms.DataGridViewTextBoxColumn Direccion;
+        private System.Windows.Forms.DataGridViewTextBoxColumn TipoTermino;
         private System.Windows.Forms.DataGridView panelResultados;
         private System.Windows.Forms.DataGridViewTextBoxColumn Num;
         private System.Windows.Forms.DataGridViewTextBoxColumn Formato;

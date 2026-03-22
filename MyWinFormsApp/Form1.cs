@@ -44,6 +44,9 @@ namespace MyWinFormsApp
     //  27  = símbolo con @
     //  28  = símbolo con #
     //  29  = símbolo operando simple
+    //  30  = directiva ORG
+    //  31  = directiva EQU
+    //  32  = expresión EQU (operando completo de EQU: constante, *, símbolo o expresión)
     // ================================================================
 
     public class SicToken
@@ -81,7 +84,7 @@ namespace MyWinFormsApp
         };
 
         static readonly HashSet<string> Directives = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            { "START","END","BASE","RESW","RESB","WORD","BYTE" };
+            { "START","END","BASE","RESW","RESB","WORD","BYTE", "ORG", "EQU" };
 
         static readonly HashSet<string> Regs = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
             { "A","X","L","B","S","T","F","PC","SW" };
@@ -143,7 +146,16 @@ namespace MyWinFormsApp
                 int dotIdx = FindCommentDot(operandRaw);
                 if (dotIdx >= 0) operandRaw = operandRaw.Substring(0, dotIdx).Trim();
                 if (!string.IsNullOrWhiteSpace(operandRaw))
-                    TokenizeOperand(operandRaw, result);
+                {
+                    // Para EQU y WORD el operando puede ser una expresión arbitraria.
+                    // Se emite un único token tipo 32 con el texto completo normalizado.
+                    bool esEQU  = result.Any(tk => tk.Type == 31);
+                    bool esWORD = result.Any(tk => tk.Type == 12);
+                    if (esEQU || esWORD)
+                        result.Add(new SicToken(32, operandRaw.Replace(" ", "")));
+                    else
+                        TokenizeOperand(operandRaw, result);
+                }
             }
 
             return result;
@@ -213,6 +225,8 @@ namespace MyWinFormsApp
                 case "RESB":  return 11;
                 case "WORD":  return 12;
                 case "BYTE":  return 13;
+                case "ORG":   return 30; /// -------------------Nuevas Directivas-------------------
+                case "EQU":   return 31;
                 default:      return 0;
             }
         }
@@ -324,7 +338,7 @@ namespace MyWinFormsApp
     public static class SicValidator
     {
         static readonly HashSet<int> InsTypes = new HashSet<int>
-            { 3,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21 };
+            { 3,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21,30,31 };
 
         public static bool Validate(List<SicToken> tokens, MyErrorListener errors,
                                     int lineNum, string lineContext,
@@ -376,8 +390,6 @@ namespace MyWinFormsApp
                     { errors.AddError(lineNum, 0, "Error: END solo puede aparecer una vez al final"); return false; }
                     if (!esFin)
                     { errors.AddError(lineNum, 0, "Error: END debe ser la última línea del programa"); return false; }
-                    if (ops.Count == 0)
-                    { errors.AddError(lineNum, 0, "Error: END requiere un símbolo de primera instrucción"); return false; }
                     // Existencia del símbolo se verifica en Paso2
                     break;
 
@@ -401,8 +413,10 @@ namespace MyWinFormsApp
 
                 // ---- WORD ----
                 case 12:
-                    if (ops.Count == 0 || !IsDecOrHex(ops[0].Text))
+                    if (ops.Count == 0)
                     { errors.AddError(lineNum, 0, $"Error: operando de WORD inválido o faltante"); return false; }
+                    // Se acepta: constante decimal/hex, símbolo, o expresión.
+                    // La validación profunda se hace en Paso 2 con acceso a TabSim completo.
                     break;
 
                 // ---- BYTE ----
@@ -432,6 +446,22 @@ namespace MyWinFormsApp
                     if (ops.Count > 0)
                     { errors.AddError(lineNum, 0, $"Error: instrucción formato 1 '{ins.Text}' no acepta operandos"); return false; }
                     break;
+                // ---- ORG ----
+                case 30: 
+                    if (ops.Count == 0 || !IsDecOrHex(ops[0].Text))
+                    { errors.AddError(lineNum, 0, $"Error: operando de ORG inválido o faltante"); return false; }
+                    break;
+                // ---- EQU ----
+                case 31:
+                //necesita una etiqueta de inicio, la directiva EQU y un valor decimal o hexadecimal, símbolo, expresión o *
+                    if (!hasLabel)
+                    { errors.AddError(lineNum, 0, "Error: EQU requiere una etiqueta (símbolo) al inicio"); return false; }
+                    if (ops.Count == 0 || string.IsNullOrWhiteSpace(ops[0].Text))
+                    { errors.AddError(lineNum, 0, "Error: EQU requiere un operando o expresion"); return false; }
+                    // Se acepta: *, constante decimal/hex, símbolo, o cualquier expresión.
+                    // La validación profunda (símbolos definidos, reglas relativo/absoluto)
+                    // se realiza en Paso1 donde se tiene acceso a TabSim.
+                    break;
             }
 
             return true;
@@ -447,7 +477,7 @@ namespace MyWinFormsApp
         }
 
         static readonly HashSet<int> InsTypes2 = new HashSet<int>
-            { 3,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21 };
+            { 3,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21,30,31 };
 
         static List<SicToken> OperandTokens(List<SicToken> tokens)
         {
@@ -459,7 +489,7 @@ namespace MyWinFormsApp
                 if (!passedIns && InsTypes2.Contains(t.Type)) { passedIns = true; continue; }
                 if (passedIns &&
                    (t.Type == 1 || t.Type == 2 || t.Type == 4 || t.Type == 5 ||
-                    t.Type == 14 || (t.Type >= 23 && t.Type <= 29)))
+                    t.Type == 14 || t.Type == 32 || (t.Type >= 23 && t.Type <= 29)))
                     result.Add(t);
             }
             return result;
@@ -474,7 +504,8 @@ namespace MyWinFormsApp
         string             Archivo;
         List<List<string>> codigo;
         public static List<string> ListaErrores = new List<string>();
-        Dictionary<string, string> TabSim;
+        // Valor: (Dirección hex, Tipo: "Absoluto" | "Relativo")
+        Dictionary<string, (string Valor, string Tipo)> TabSim;
 
         public Form1()
         {
@@ -729,7 +760,9 @@ namespace MyWinFormsApp
                     if (t.Count > 0 && t[0].Type == 25)
                     {
                         r.Cells[3].Value = t[0].Text;
-                        if (TabSim.ContainsKey(t[0].Text))
+                        // EQU gestiona su propio control de duplicado dentro de su bloque
+                        bool esEQU_check = t.Any(tk => tk.Type == 31);
+                        if (!esEQU_check && TabSim.ContainsKey(t[0].Text))
                             ErrorSimboloDuplicado = true;
                     }
 
@@ -781,15 +814,79 @@ namespace MyWinFormsApp
                     }
                     else
                     {
+                        // Handle ORG directive
+                        string currentIns = r.Cells[4].Value?.ToString() ?? "";
+                        if (currentIns == "ORG")
+                        {
+                            string oper = r.Cells[5].Value?.ToString() ?? "";
+                            if (!string.IsNullOrEmpty(oper))
+                            {
+                                ContadorPrograma = ParseDecOrHex(oper);
+                            }
+                        }
+
+                        // ---- Handle EQU directive ----
+                        if (currentIns == "EQU" && t.Count > 0 && t[0].Type == 25)
+                        {
+                            string labelEqu = t[0].Text;
+
+                            // Verificar símbolo duplicado
+                            if (TabSim.ContainsKey(labelEqu))
+                            {
+                                r.Cells[6].Value = "Error: Simbolo Duplicado";
+                                r.Cells[6].Style.ForeColor = Color.Red;
+                            }
+                            else
+                            {
+                                string operEqu = r.Cells[5].Value?.ToString() ?? "";
+
+                                if (operEqu == "*")
+                                {
+                                    // EQU * → valor del CP actual, tipo Relativo
+                                    string hexCP = ContadorPrograma.ToString("X4").ToUpper();
+                                    TabSim[labelEqu] = (hexCP, "Relativo");
+                                    InsertarTabSim(labelEqu, hexCP, "Relativo");
+                                }
+                                else
+                                {
+                                    // Intentar evaluar la expresión
+                                    var evalResult = EvaluarExpresionEQU(operEqu);
+
+                                    if (evalResult.Error)
+                                    {
+                                        // Expresión inválida → FFFF, Absoluto
+                                        r.Cells[6].Value = "Error: Expresion no valida";
+                                        r.Cells[6].Style.ForeColor = Color.Red;
+                                        TabSim[labelEqu] = ("FFFF", "Absoluto");
+                                        InsertarTabSim(labelEqu, "FFFF", "Absoluto");
+                                    }
+                                    else
+                                    {
+                                        string hexVal = evalResult.Valor.ToString("X4").ToUpper();
+                                        string tipo   = evalResult.EsRelativo ? "Relativo" : "Absoluto";
+                                        TabSim[labelEqu] = (hexVal, tipo);
+                                        InsertarTabSim(labelEqu, hexVal, tipo);
+                                    }
+                                }
+                            }
+                        }
+
                         // Insertar símbolo en TabSim
                         if (t.Count > 0 && t[0].Type == 25)
                         {
-                            TabSim[t[0].Text] = ContadorPrograma.ToString();
-                            var rs = new DataGridViewRow();
-                            rs.CreateCells(TablaSimbolos_Panel);
-                            rs.Cells[0].Value = t[0].Text;
-                            rs.Cells[1].Value = ContadorPrograma.ToString("X").ToUpper();
-                            TablaSimbolos_Panel.Rows.Add(rs);
+                            string currentIns2 = r.Cells[4].Value?.ToString() ?? "";
+                            // EQU se maneja por separado; aquí solo se insertan etiquetas de instrucciones/directivas normales
+                            if (currentIns2 != "EQU")
+                            {
+                                string hexVal = ContadorPrograma.ToString("X").ToUpper();
+                                TabSim[t[0].Text] = (hexVal, "Relativo");
+                                var rs = new DataGridViewRow();
+                                rs.CreateCells(TablaSimbolos_Panel);
+                                rs.Cells[0].Value = t[0].Text;
+                                rs.Cells[1].Value = hexVal;
+                                rs.Cells[2].Value = "Relativo";
+                                TablaSimbolos_Panel.Rows.Add(rs);
+                            }
                         }
                     }
 
@@ -812,6 +909,8 @@ namespace MyWinFormsApp
                                 switch (ins2)
                                 {
                                     case "BASE": break;
+                                    case "ORG":  break;
+                                    case "EQU":  break; // no genera código, no incrementa CP
                                     case "RESW": ContadorPrograma += ParseDecOrHex(oper) * 3; break;
                                     case "RESB": ContadorPrograma += ParseDecOrHex(oper);     break;
                                     case "WORD": ContadorPrograma += 3; break; // siempre 3 bytes
@@ -826,6 +925,374 @@ namespace MyWinFormsApp
             }
 
             numTamProg.Text = ContadorPrograma.ToString("X") + "H";
+        }
+
+        // ---- Inserta símbolo en TablaSimbolos_Panel (columnas: Símbolo, Dirección, Tipo) ----
+        private void InsertarTabSim(string simbolo, string hexVal, string tipo)
+        {
+            var rs = new DataGridViewRow();
+            rs.CreateCells(TablaSimbolos_Panel);
+            rs.Cells[0].Value = simbolo;
+            rs.Cells[1].Value = hexVal;
+            rs.Cells[2].Value = tipo;
+            TablaSimbolos_Panel.Rows.Add(rs);
+        }
+
+        // ================================================================
+        //  Resultado de EvaluarExpresionEQU
+        // ================================================================
+        private struct EvalResult
+        {
+            public bool Error;
+            public int  Valor;
+            public bool EsRelativo;   // true si la expresión es relativa (uso externo)
+            public int  RelCount;     // cuenta algebraica de términos relativos (+rel=+1, -rel=-1)
+                                      // solo significativo cuando Error=false
+        }
+
+        // ================================================================
+        //  Evalúa una expresión EQU con las reglas de términos y expresiones.
+        //  Solo acepta símbolos YA definidos en TabSim.
+        // ================================================================
+        private EvalResult EvaluarExpresionEQU(string expr)
+        {
+            if (string.IsNullOrWhiteSpace(expr))
+                return new EvalResult { Error = true };
+
+            try
+            {
+                var tokens = TokenizarExpr(expr);
+                if (tokens == null) return new EvalResult { Error = true };
+                int pos = 0;
+                var resultado = ParseSumaRaiz(tokens, ref pos,
+                    (toks, ref p) => ParseFactorGen(toks, ref p, ParsePrimario));
+                if (resultado.Error || pos != tokens.Count)
+                    return new EvalResult { Error = true };
+                return resultado;
+            }
+            catch
+            {
+                return new EvalResult { Error = true };
+            }
+        }
+
+        // ---- Tokens de expresión ----
+        private enum ExprTokKind { Num, Sym, Plus, Minus, Star, Slash, LParen, RParen }
+        private struct ExprToken
+        {
+            public ExprTokKind Kind;
+            public int         NumVal;
+            public bool        EsRel;
+            public string      Text;
+        }
+
+        private List<ExprToken> TokenizarExpr(string expr)
+        {
+            var list = new List<ExprToken>();
+            int i = 0;
+            expr = expr.Trim();
+            while (i < expr.Length)
+            {
+                char c = expr[i];
+                if (c == ' ' || c == '\t') { i++; continue; }
+
+                if (c == '+') { list.Add(new ExprToken { Kind = ExprTokKind.Plus,   Text = "+" }); i++; continue; }
+                if (c == '-') { list.Add(new ExprToken { Kind = ExprTokKind.Minus,  Text = "-" }); i++; continue; }
+                if (c == '*') { list.Add(new ExprToken { Kind = ExprTokKind.Star,   Text = "*" }); i++; continue; }
+                if (c == '/') { list.Add(new ExprToken { Kind = ExprTokKind.Slash,  Text = "/" }); i++; continue; }
+                if (c == '(') { list.Add(new ExprToken { Kind = ExprTokKind.LParen, Text = "(" }); i++; continue; }
+                if (c == ')') { list.Add(new ExprToken { Kind = ExprTokKind.RParen, Text = ")" }); i++; continue; }
+
+                // Número o símbolo
+                int start = i;
+                while (i < expr.Length && expr[i] != ' ' && expr[i] != '\t' &&
+                       expr[i] != '+' && expr[i] != '-' && expr[i] != '*' &&
+                       expr[i] != '/' && expr[i] != '(' && expr[i] != ')')
+                    i++;
+                string word = expr.Substring(start, i - start);
+                if (string.IsNullOrEmpty(word)) return null;
+
+                if (int.TryParse(word, out int dec))
+                {
+                    list.Add(new ExprToken { Kind = ExprTokKind.Num, NumVal = dec, EsRel = false, Text = word });
+                    continue;
+                }
+                if (word.EndsWith("H", StringComparison.OrdinalIgnoreCase) &&
+                    SicLexer.IsHex(word.Substring(0, word.Length - 1)))
+                {
+                    int hval = Convert.ToInt32(word.Substring(0, word.Length - 1), 16);
+                    list.Add(new ExprToken { Kind = ExprTokKind.Num, NumVal = hval, EsRel = false, Text = word });
+                    continue;
+                }
+                if (TabSim.ContainsKey(word))
+                {
+                    var entry = TabSim[word];
+                    int sval  = Convert.ToInt32(entry.Valor, 16);
+                    bool srel = (entry.Tipo == "Relativo");
+                    list.Add(new ExprToken { Kind = ExprTokKind.Sym, NumVal = sval, EsRel = srel, Text = word });
+                    continue;
+                }
+                return null; // símbolo no definido
+            }
+            return list;
+        }
+
+        // ================================================================
+        //  Núcleo del parser — compartido por Paso1 y Paso2.
+        //
+        //  ParseSumaRaiz   : valida reglas de pareamiento al final.
+        //  ParseSumaInterna: calcula valor y RelCount sin validar
+        //                    (usada dentro de paréntesis).
+        //  ParseFactorGen  : maneja * / con función de primario inyectada.
+        // ================================================================
+
+        // Delegado que apunta a la función ParsePrimario correspondiente
+        private delegate EvalResult PrimarioFn(List<ExprToken> toks, ref int pos);
+
+        /// <summary>
+        /// Evalúa una suma/resta y al terminar aplica las reglas de pareamiento
+        /// de términos relativos. Úsese solo en el nivel raíz.
+        /// </summary>
+        private EvalResult ParseSumaRaiz(List<ExprToken> toks, ref int pos, PrimarioFn factorFn)
+        {
+            var inner = ParseSumaInterna(toks, ref pos, factorFn);
+            if (inner.Error) return inner;
+
+            // Validar reglas de pareamiento sobre RelCount total
+            // RelCount > 0: relativos positivos netos; < 0: negativos netos
+            int rc = inner.RelCount;
+            bool esRelativa;
+            if      (rc ==  0) esRelativa = false;      // absoluta
+            else if (rc ==  1) esRelativa = true;       // relativa válida (1 relativo positivo)
+            else if (rc == -1) return new EvalResult { Error = true }; // relativo negativo solo → error
+            else               return new EvalResult { Error = true }; // más de 1 relativo sin pareja → error
+
+            return new EvalResult { Error = false, Valor = inner.Valor, EsRelativo = esRelativa, RelCount = rc };
+        }
+
+        /// <summary>
+        /// Evalúa una suma/resta acumulando RelCount algebraicamente.
+        /// NO valida reglas de pareamiento (para uso dentro de paréntesis).
+        /// </summary>
+        private EvalResult ParseSumaInterna(List<ExprToken> toks, ref int pos, PrimarioFn factorFn)
+        {
+            // Signo unario opcional al inicio del término/subexpresión
+            int signo = +1;
+            if (pos < toks.Count && toks[pos].Kind == ExprTokKind.Minus) { signo = -1; pos++; }
+            else if (pos < toks.Count && toks[pos].Kind == ExprTokKind.Plus) { pos++; }
+
+            var left = factorFn(toks, ref pos);
+            if (left.Error) return left;
+
+            int totalVal = signo * left.Valor;
+            int relCount = signo * left.RelCount;  // propaga signo al conteo de relativos
+
+            while (pos < toks.Count &&
+                   (toks[pos].Kind == ExprTokKind.Plus || toks[pos].Kind == ExprTokKind.Minus))
+            {
+                int op = toks[pos].Kind == ExprTokKind.Plus ? +1 : -1;
+                pos++;
+                var right = factorFn(toks, ref pos);
+                if (right.Error) return right;
+
+                totalVal += op * right.Valor;
+                relCount += op * right.RelCount;
+            }
+
+            return new EvalResult { Error = false, Valor = totalVal, EsRelativo = (relCount != 0), RelCount = relCount };
+        }
+
+        /// <summary>
+        /// Evalúa multiplicación/división. Rechaza relativos en * o /.
+        /// </summary>
+        private EvalResult ParseFactorGen(List<ExprToken> toks, ref int pos, PrimarioFn primFn)
+        {
+            var left = primFn(toks, ref pos);
+            if (left.Error) return left;
+
+            while (pos < toks.Count &&
+                   (toks[pos].Kind == ExprTokKind.Star || toks[pos].Kind == ExprTokKind.Slash))
+            {
+                var opKind = toks[pos].Kind;
+                pos++;
+                var right = primFn(toks, ref pos);
+                if (right.Error) return right;
+
+                if (left.RelCount != 0 || right.RelCount != 0)
+                    return new EvalResult { Error = true }; // relativos no pueden estar en * /
+
+                int val = opKind == ExprTokKind.Star
+                    ? left.Valor * right.Valor
+                    : (right.Valor == 0 ? 0 : left.Valor / right.Valor);
+
+                left = new EvalResult { Error = false, Valor = val, EsRelativo = false, RelCount = 0 };
+            }
+            return left;
+        }
+
+        // ---- Primario para Paso 1 (usa TokenizarExpr → TabSim) ----
+        private EvalResult ParsePrimario(List<ExprToken> toks, ref int pos)
+        {
+            if (pos >= toks.Count) return new EvalResult { Error = true };
+            var tok = toks[pos];
+
+            if (tok.Kind == ExprTokKind.Num || tok.Kind == ExprTokKind.Sym)
+            {
+                pos++;
+                int rc = tok.EsRel ? 1 : 0;
+                return new EvalResult { Error = false, Valor = tok.NumVal, EsRelativo = tok.EsRel, RelCount = rc };
+            }
+
+            if (tok.Kind == ExprTokKind.LParen)
+            {
+                pos++;
+                // Dentro de paréntesis usamos ParseSumaInterna (sin validar pareamiento)
+                var inner = ParseSumaInterna(toks, ref pos,
+                    (t2, ref p2) => ParseFactorGen(t2, ref p2, ParsePrimario));
+                if (inner.Error) return inner;
+                if (pos >= toks.Count || toks[pos].Kind != ExprTokKind.RParen)
+                    return new EvalResult { Error = true };
+                pos++;
+                return inner;
+            }
+
+            return new EvalResult { Error = true };
+        }
+
+        // ================================================================
+        //  Detecta si un string de operando es una expresión compuesta
+        //  (contiene operadores aritméticos o paréntesis).
+        //  Excluye el caso de un solo símbolo o constante simple.
+        // ================================================================
+        private bool EsExpresionCompuesta(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return false;
+            // Si contiene +, -, *, /, ( o ) → es expresión compuesta
+            // Cuidado: el '-' puede estar en nombres? No, los símbolos SIC no llevan '-'
+            return s.IndexOfAny(new char[] { '+', '-', '*', '/', '(', ')' }) >= 0;
+        }
+
+        // ================================================================
+        //  Evaluador de expresiones para Paso 2.
+        //  Lee símbolos desde TablaSimbolos_Panel (Cells[0]=nombre,
+        //  Cells[1]=valor hex, Cells[2]=tipo).
+        //  Aplica las mismas reglas de término y expresión que Paso 1.
+        // ================================================================
+        private EvalResult EvaluarExpresionPaso2(string expr)
+        {
+            if (string.IsNullOrWhiteSpace(expr))
+                return new EvalResult { Error = true };
+            try
+            {
+                var tokens = TokenizarExprPaso2(expr);
+                if (tokens == null) return new EvalResult { Error = true };
+                int pos = 0;
+                var resultado = ParseSumaPaso2(tokens, ref pos);
+                if (resultado.Error || pos != tokens.Count)
+                    return new EvalResult { Error = true };
+                return resultado;
+            }
+            catch { return new EvalResult { Error = true }; }
+        }
+
+        // ---- Tokenizador para Paso 2 (lee TablaSimbolos_Panel) ----
+        private List<ExprToken> TokenizarExprPaso2(string expr)
+        {
+            var list = new List<ExprToken>();
+            int i = 0;
+            expr = expr.Trim();
+            while (i < expr.Length)
+            {
+                char c = expr[i];
+                if (c == ' ' || c == '\t') { i++; continue; }
+                if (c == '+') { list.Add(new ExprToken { Kind = ExprTokKind.Plus,   Text = "+" }); i++; continue; }
+                if (c == '-') { list.Add(new ExprToken { Kind = ExprTokKind.Minus,  Text = "-" }); i++; continue; }
+                if (c == '*') { list.Add(new ExprToken { Kind = ExprTokKind.Star,   Text = "*" }); i++; continue; }
+                if (c == '/') { list.Add(new ExprToken { Kind = ExprTokKind.Slash,  Text = "/" }); i++; continue; }
+                if (c == '(') { list.Add(new ExprToken { Kind = ExprTokKind.LParen, Text = "(" }); i++; continue; }
+                if (c == ')') { list.Add(new ExprToken { Kind = ExprTokKind.RParen, Text = ")" }); i++; continue; }
+
+                int start = i;
+                while (i < expr.Length && expr[i] != ' ' && expr[i] != '\t' &&
+                       expr[i] != '+' && expr[i] != '-' && expr[i] != '*' &&
+                       expr[i] != '/' && expr[i] != '(' && expr[i] != ')')
+                    i++;
+                string word = expr.Substring(start, i - start);
+                if (string.IsNullOrEmpty(word)) return null;
+
+                // Constante decimal
+                if (int.TryParse(word, out int dec))
+                {
+                    list.Add(new ExprToken { Kind = ExprTokKind.Num, NumVal = dec, EsRel = false, Text = word });
+                    continue;
+                }
+                // Constante hex (ej. 1AH)
+                if (word.EndsWith("H", StringComparison.OrdinalIgnoreCase) &&
+                    SicLexer.IsHex(word.Substring(0, word.Length - 1)))
+                {
+                    int hval = Convert.ToInt32(word.Substring(0, word.Length - 1), 16);
+                    list.Add(new ExprToken { Kind = ExprTokKind.Num, NumVal = hval, EsRel = false, Text = word });
+                    continue;
+                }
+                // Símbolo → buscar en TablaSimbolos_Panel
+                bool encontrado = false;
+                foreach (DataGridViewRow row in TablaSimbolos_Panel.Rows)
+                {
+                    string nombre = row.Cells[0]?.Value?.ToString() ?? "";
+                    if (string.Equals(nombre, word, StringComparison.OrdinalIgnoreCase))
+                    {
+                        int sval  = Convert.ToInt32(row.Cells[1]?.Value?.ToString() ?? "0", 16);
+                        bool srel = (row.Cells[2]?.Value?.ToString() ?? "") == "Relativo";
+                        list.Add(new ExprToken { Kind = ExprTokKind.Sym, NumVal = sval, EsRel = srel, Text = word });
+                        encontrado = true;
+                        break;
+                    }
+                }
+                if (!encontrado) return null;  // símbolo no definido → error
+            }
+            return list;
+        }
+
+        // ---- ParseSuma para Paso 2 (mismas reglas de pareamiento) ----
+        private EvalResult ParseSumaPaso2(List<ExprToken> toks, ref int pos)
+        {
+            return ParseSumaRaiz(toks, ref pos,
+                (t, ref p) => ParseFactorGen(t, ref p, ParsePrimarioPaso2));
+        }
+
+        // ---- ParseFactor para Paso 2 ----
+        private EvalResult ParseFactorPaso2(List<ExprToken> toks, ref int pos)
+        {
+            return ParseFactorGen(toks, ref pos, ParsePrimarioPaso2);
+        }
+
+        // ---- ParsePrimario para Paso 2 (lee TablaSimbolos_Panel) ----
+        private EvalResult ParsePrimarioPaso2(List<ExprToken> toks, ref int pos)
+        {
+            if (pos >= toks.Count) return new EvalResult { Error = true };
+            var tok = toks[pos];
+
+            if (tok.Kind == ExprTokKind.Num || tok.Kind == ExprTokKind.Sym)
+            {
+                pos++;
+                int rc = tok.EsRel ? 1 : 0;
+                return new EvalResult { Error = false, Valor = tok.NumVal, EsRelativo = tok.EsRel, RelCount = rc };
+            }
+
+            if (tok.Kind == ExprTokKind.LParen)
+            {
+                pos++;
+                // Dentro de paréntesis usamos ParseSumaInterna (sin validar pareamiento)
+                var inner = ParseSumaInterna(toks, ref pos,
+                    (t2, ref p2) => ParseFactorGen(t2, ref p2, ParsePrimarioPaso2));
+                if (inner.Error) return inner;
+                if (pos >= toks.Count || toks[pos].Kind != ExprTokKind.RParen)
+                    return new EvalResult { Error = true };
+                pos++;
+                return inner;
+            }
+
+            return new EvalResult { Error = true };
         }
 
         // ---- Calcula tamaño en bytes de un operando BYTE ----
@@ -905,11 +1372,12 @@ namespace MyWinFormsApp
             string ret  = "";
             foreach (var token in t)
             {
-                // Tipos de instrucción/directiva: 3,6,7-13,15-21
+                // Tipos de instrucción/directiva: 3,6,7-13,15-21,30,31
                 // Excluir tipo 14 (registro) que también cae en el rango
                 if (token.Type == 3 || token.Type == 6 ||
                    (token.Type >= 7  && token.Type <= 13) ||
-                   (token.Type >= 15 && token.Type <= 21))
+                   (token.Type >= 15 && token.Type <= 21) ||
+                   token.Type == 30 || token.Type == 31)
                 { ret = token.Text; cont++; }
             }
             return cont == 1 ? ret : "Error";
@@ -922,8 +1390,8 @@ namespace MyWinFormsApp
             for (int i = 0; i < t.Count; i++)
             {
                 if (i != 0 &&
-                   (t[i].Type == 1 || t[i].Type == 2 || t[i].Type == 4 ||
-                    t[i].Type == 5 || t[i].Type == 14 ||
+                   (t[i].Type == 1  || t[i].Type == 2 || t[i].Type == 4 ||
+                    t[i].Type == 5  || t[i].Type == 14 || t[i].Type == 32 ||
                    (t[i].Type >= 23 && t[i].Type <= 29)))
                     list.Add(t[i].Text);
             }
@@ -937,7 +1405,7 @@ namespace MyWinFormsApp
             TablaSimbolos_Panel.Rows.Clear();
             panelResultados.Rows.Clear();
             string inputText = rtbCode.Text;
-            TabSim       = new Dictionary<string, string>();
+            TabSim       = new Dictionary<string, (string Valor, string Tipo)>();
             codigo       = new List<List<string>>();
             ListaErrores = new List<string>();
 
@@ -1021,8 +1489,9 @@ namespace MyWinFormsApp
                     { panelResultados.Rows[i].Cells[7].Value = "---"; continue; }
                 }
 
-                // ---- START / RESW / RESB no generan código objeto ----
-                if (instruccion == "START" || instruccion == "RESW" || instruccion == "RESB")
+                // ---- START / RESW / RESB / EQU / ORG no generan código objeto ----
+                if (instruccion == "START" || instruccion == "RESW" || instruccion == "RESB" ||
+                    instruccion == "EQU"   || instruccion == "ORG")
                 { panelResultados.Rows[i].Cells[7].Value = "---"; continue; }
 
                 // ---- END: verificar símbolo ----
@@ -1070,17 +1539,42 @@ namespace MyWinFormsApp
                     continue;
                 }
 
-                // ---- WORD: genera 3 bytes ----
+                // ---- WORD: genera 3 bytes, acepta expresiones ----
                 if (instruccion == "WORD")
                 {
-                    string obj;
-                    if (operando.EndsWith("H", StringComparison.OrdinalIgnoreCase))
-                        obj = operando.TrimEnd('H', 'h').PadLeft(6, '0').ToUpper();
-                    else if (int.TryParse(operando, out int valDec))
-                        obj = valDec.ToString("X6");
+                    string exprWord = operando.Trim();
+                    string objWord;
+
+                    // Caso simple: constante decimal
+                    if (int.TryParse(exprWord, out int valDecW))
+                    {
+                        objWord = valDecW.ToString("X6").ToUpper().PadLeft(6,'0');
+                        // Una constante pura es absoluta, sin *
+                    }
+                    // Caso simple: constante hex (ej. 1AH)
+                    else if (exprWord.EndsWith("H", StringComparison.OrdinalIgnoreCase) &&
+                             SicLexer.IsHex(exprWord.Substring(0, exprWord.Length - 1)))
+                    {
+                        int valHexW = Convert.ToInt32(exprWord.Substring(0, exprWord.Length - 1), 16);
+                        objWord = valHexW.ToString("X6").ToUpper().PadLeft(6,'0');
+                    }
+                    // Expresión (contiene operadores, paréntesis, o símbolos)
                     else
-                        obj = "000000";
-                    panelResultados.Rows[i].Cells[7].Value = obj;
+                    {
+                        var evalW = EvaluarExpresionPaso2(exprWord);
+                        if (evalW.Error)
+                        {
+                            panelResultados.Rows[i].Cells[7].Value = "---";
+                            panelResultados.Rows[i].Cells[8].Value = "Error: Expresion no valida";
+                            panelResultados.Rows[i].Cells[8].Style.ForeColor = Color.Red;
+                            continue;
+                        }
+                        // Valor a 3 bytes (6 dígitos hex)
+                        objWord = (evalW.Valor & 0xFFFFFF).ToString("X6").ToUpper().PadLeft(6,'0');
+                        if (evalW.EsRelativo) objWord += "*";
+                    }
+
+                    panelResultados.Rows[i].Cells[7].Value = objWord;
                     continue;
                 }
 
@@ -1131,7 +1625,32 @@ namespace MyWinFormsApp
                     bool   esConstante = false;
                     bool   esHex       = false;
 
-                    if (int.TryParse(operandoLimpio.TrimEnd('H', 'h'), out int numero))
+                    // ¿Expresión? (contiene operadores aritméticos o paréntesis que no sean @/#/,X)
+                    bool esExprFmt3 = EsExpresionCompuesta(operandoLimpio);
+
+                    if (esExprFmt3)
+                    {
+                        var evalF3 = EvaluarExpresionPaso2(operandoLimpio);
+                        if (evalF3.Error)
+                        {
+                            panelResultados.Rows[i].Cells[8].Value = "Error: Expresion no valida";
+                            panelResultados.Rows[i].Cells[8].Style.ForeColor = Color.Red;
+                            panelResultados.Rows[i].Cells[7].Value = "---";
+                            continue;
+                        }
+                        TA = evalF3.Valor;
+                        // Validar rango: negativo → error, 0-4095 → constante, >4095 → dirección
+                        if (TA < 0)
+                        {
+                            panelResultados.Rows[i].Cells[8].Value = "Error: Operando fuera de rango";
+                            panelResultados.Rows[i].Cells[8].Style.ForeColor = Color.Red;
+                            panelResultados.Rows[i].Cells[7].Value = "---";
+                            continue;
+                        }
+                        esConstante  = (TA <= 4095);
+                        noExisteSim  = false;
+                    }
+                    else if (int.TryParse(operandoLimpio.TrimEnd('H', 'h'), out int numero))
                     {
                         int numeroDecimal;
                         if (operandoLimpio.EndsWith("H", StringComparison.OrdinalIgnoreCase))
@@ -1220,7 +1739,24 @@ namespace MyWinFormsApp
                     int TA = 0xFFFFF;
                     bool esM = false;
 
-                    if (operandoLimpio.EndsWith("H", StringComparison.OrdinalIgnoreCase))
+                    // ¿Expresión compuesta?
+                    bool esExprFmt4 = EsExpresionCompuesta(operandoLimpio);
+
+                    if (esExprFmt4)
+                    {
+                        var evalF4 = EvaluarExpresionPaso2(operandoLimpio);
+                        if (evalF4.Error)
+                        {
+                            panelResultados.Rows[i].Cells[8].Value = "Error: Expresion no valida";
+                            panelResultados.Rows[i].Cells[8].Style.ForeColor = Color.Red;
+                            panelResultados.Rows[i].Cells[7].Value = "---";
+                            continue;
+                        }
+                        TA = evalF4.Valor & 0xFFFFF;
+                        noExisteSim = false;
+                        esM = true;
+                    }
+                    else if (operandoLimpio.EndsWith("H", StringComparison.OrdinalIgnoreCase))
                     {
                         // Constante hex: si valor > 4095 es dirección de memoria, si no es constante
                         string nHex = operandoLimpio.TrimEnd('H', 'h');
