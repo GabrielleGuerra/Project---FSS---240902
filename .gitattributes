@@ -1,2 +1,19 @@
 # Auto detect text files and perform LF normalization
-* text=auto
+
+# Visual Studio
+.vs/
+*.slnx
+
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+
+# Debug files
+*.pdb
+*.cache
+*.log
+*.err

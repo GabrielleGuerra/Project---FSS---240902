@@ -116,7 +116,7 @@
             this.FileGenerattor.Font = new System.Drawing.Font("Arial", 9);
             this.FileGenerattor.Cursor = System.Windows.Forms.Cursors.Hand;
             this.FileGenerattor.Click += new System.EventHandler(this.FileGenerattor_Click);
-            
+
             // Botón Limpiar Limpia UI
             System.Windows.Forms.Button btnLimpiar = new System.Windows.Forms.Button();
             btnLimpiar.Name = "btnLimpiar";
@@ -131,6 +131,7 @@
             {
                 rtbCode.Clear();
                 rtbErrors.Clear();
+                rtbObjArchivo.Clear();
                 TablaSimbolos_Panel.Rows.Clear();
                 panelResultados.Rows.Clear();
                 txtRutaArchivo.Clear();
@@ -243,6 +244,12 @@
             splitDerecho.Orientation = System.Windows.Forms.Orientation.Vertical;
             splitDerecho.SplitterDistance = 30;
 
+            // ---- TABSIM + Archivo Objeto (split horizontal dentro de Panel1) ----
+            System.Windows.Forms.SplitContainer splitSim = new System.Windows.Forms.SplitContainer();
+            splitSim.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitSim.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            splitSim.SplitterDistance = 55; // 55% TABSIM, 45% OBJ
+
             //TABSIM
             System.Windows.Forms.Panel panelSim = new System.Windows.Forms.Panel();
             panelSim.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -303,6 +310,37 @@
 
             panelSim.Controls.Add(this.TablaSimbolos_Panel);
             panelSim.Controls.Add(lblSim);
+
+            // Panel código objeto (archivo .obj)
+            System.Windows.Forms.Panel panelObjArch = new System.Windows.Forms.Panel();
+            panelObjArch.Dock = System.Windows.Forms.DockStyle.Fill;
+            panelObjArch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+
+            System.Windows.Forms.Label lblObjArch = new System.Windows.Forms.Label();
+            lblObjArch.Text = "CÓDIGO OBJETO (.OBJ)";
+            lblObjArch.Dock = System.Windows.Forms.DockStyle.Top;
+            lblObjArch.Height = 28;
+            lblObjArch.BackColor = System.Drawing.Color.Goldenrod;
+            lblObjArch.ForeColor = System.Drawing.Color.White;
+            lblObjArch.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
+            lblObjArch.Padding = new System.Windows.Forms.Padding(5);
+            lblObjArch.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+
+            this.rtbObjArchivo = new System.Windows.Forms.RichTextBox();
+            this.rtbObjArchivo.Name = "rtbObjArchivo";
+            this.rtbObjArchivo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.rtbObjArchivo.ReadOnly = true;
+            this.rtbObjArchivo.Font = new System.Drawing.Font("Courier New", 9);
+            this.rtbObjArchivo.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
+            this.rtbObjArchivo.BackColor = System.Drawing.Color.Black;
+            this.rtbObjArchivo.ForeColor = System.Drawing.Color.LimeGreen;
+            this.rtbObjArchivo.Text = "";
+
+            panelObjArch.Controls.Add(this.rtbObjArchivo);
+            panelObjArch.Controls.Add(lblObjArch);
+
+            splitSim.Panel1.Controls.Add(panelSim);
+            splitSim.Panel2.Controls.Add(panelObjArch);
 
             // tabla intermedia / resultados
             System.Windows.Forms.Panel panelInt = new System.Windows.Forms.Panel();
@@ -416,7 +454,7 @@
             panelInt.Controls.Add(this.panelResultados);
             panelInt.Controls.Add(lblInt);
 
-            splitDerecho.Panel1.Controls.Add(panelSim);
+            splitDerecho.Panel1.Controls.Add(splitSim);
             splitDerecho.Panel2.Controls.Add(panelInt);
 
             // ============================================================================
@@ -458,5 +496,6 @@
         private System.Windows.Forms.Button tabla;
         private System.Windows.Forms.Button CodigoObj;
         private System.Windows.Forms.Button FileGenerattor;
+        private System.Windows.Forms.RichTextBox rtbObjArchivo;
     }
 }
