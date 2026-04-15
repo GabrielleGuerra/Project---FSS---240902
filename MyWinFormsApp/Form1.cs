@@ -1405,7 +1405,7 @@ namespace MyWinFormsApp
                     string exprWord = operando.Trim();
                     string objWord;
                     if (int.TryParse(exprWord, out int valDecW))
-                        objWord = valDecW.ToString("X6").ToUpper().PadLeft(6, '0');
+                        objWord = (valDecW & 0xFFFFFF).ToString("X6").ToUpper().PadLeft(6, '0');
                     else if (exprWord.EndsWith("H", StringComparison.OrdinalIgnoreCase) &&
                              SicLexer.IsHex(exprWord.Substring(0, exprWord.Length - 1)))
                     {
