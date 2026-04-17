@@ -142,13 +142,13 @@
             this.tamProg = new System.Windows.Forms.Label();
             this.tamProg.AutoSize = true;
             this.tamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.tamProg.Location = new System.Drawing.Point(1390, 22);
+            this.tamProg.Location = new System.Drawing.Point(1530, 22);
             this.tamProg.Text = "Tamaño del programa:";
 
             this.numTamProg = new System.Windows.Forms.Label();
             this.numTamProg.AutoSize = true;
             this.numTamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.numTamProg.Location = new System.Drawing.Point(1610, 22);
+            this.numTamProg.Location = new System.Drawing.Point(1750, 22);
             this.numTamProg.Text = "0H";
 
             panelSuperior.Controls.Add(lblArchivo);
@@ -161,6 +161,19 @@
             panelSuperior.Controls.Add(btnLimpiar);
             panelSuperior.Controls.Add(this.tamProg);
             panelSuperior.Controls.Add(this.numTamProg);
+
+            // Botón Ver Tabla de Bloques
+            this.btnVerBloques = new System.Windows.Forms.Button();
+            this.btnVerBloques.Name = "btnVerBloques";
+            this.btnVerBloques.Text = "Ver Tabla Bloques";
+            this.btnVerBloques.Location = new System.Drawing.Point(1385, 15);
+            this.btnVerBloques.Size = new System.Drawing.Size(130, 40);
+            this.btnVerBloques.Font = new System.Drawing.Font("Arial", 9);
+            this.btnVerBloques.BackColor = System.Drawing.Color.MediumPurple;
+            this.btnVerBloques.ForeColor = System.Drawing.Color.White;
+            this.btnVerBloques.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVerBloques.Click += new System.EventHandler(this.btnVerBloques_Click);
+            panelSuperior.Controls.Add(this.btnVerBloques);
 
             // ============================================================================
             // SPLITTER PRINCIPAL (izquierda | derecha)
@@ -360,6 +373,7 @@
             this.panelResultados = new System.Windows.Forms.DataGridView();
             this.Num = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Formato = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.NoBloque = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CP = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ETQ = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.INS = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -393,7 +407,13 @@
             this.Formato.ReadOnly = true;
             this.Formato.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
             this.Formato.MinimumWidth = 8;
-            this.Formato.Width = 105;
+            this.Formato.Width = 80;
+
+            this.NoBloque.HeaderText = "No.Bloque";
+            this.NoBloque.Name = "NoBloque";
+            this.NoBloque.ReadOnly = true;
+            this.NoBloque.MinimumWidth = 8;
+            this.NoBloque.Width = 80;
 
             this.CP.HeaderText = "CP";
             this.CP.Name = "CP";
@@ -441,6 +461,7 @@
             this.panelResultados.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
                 this.Num,
                 this.Formato,
+                this.NoBloque,
                 this.CP,
                 this.ETQ,
                 this.INS,
@@ -484,6 +505,7 @@
         private System.Windows.Forms.DataGridView panelResultados;
         private System.Windows.Forms.DataGridViewTextBoxColumn Num;
         private System.Windows.Forms.DataGridViewTextBoxColumn Formato;
+        private System.Windows.Forms.DataGridViewTextBoxColumn NoBloque;
         private System.Windows.Forms.DataGridViewTextBoxColumn CP;
         private System.Windows.Forms.DataGridViewTextBoxColumn ETQ;
         private System.Windows.Forms.DataGridViewTextBoxColumn INS;
@@ -496,6 +518,7 @@
         private System.Windows.Forms.Button tabla;
         private System.Windows.Forms.Button CodigoObj;
         private System.Windows.Forms.Button FileGenerattor;
+        private System.Windows.Forms.Button btnVerBloques;
         private System.Windows.Forms.RichTextBox rtbObjArchivo;
     }
 }
