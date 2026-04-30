@@ -2,15 +2,8 @@
 {
     partial class Form1
     {
-        /// <summary>
-        /// Variable del diseñador necesaria.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Limpiar los recursos que se estén usando.
-        /// </summary>
-        /// <param name="disposing">true si los recursos administrados se deben desechar; false en caso contrario.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,15 +15,11 @@
 
         #region Código generado por el Diseñador de Windows Forms
 
-        /// <summary>
-        /// Método necesario para admitir el Diseñador. No se puede modificar
-        /// el contenido de este método con el editor de código.
-        /// </summary>
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1865, 750);
+            this.ClientSize = new System.Drawing.Size(2000, 750);
             this.Text = "Analizador de Ensamblador SIC/XE";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.WindowState = System.Windows.Forms.FormWindowState.Normal;
@@ -44,15 +33,15 @@
             panelSuperior.Height = 70;
             panelSuperior.BackColor = System.Drawing.Color.LightGray;
             panelSuperior.Padding = new System.Windows.Forms.Padding(10);
+            panelSuperior.AutoScroll = true; // Activa las barras de scroll automáticas
+            panelSuperior.AutoScrollMinSize = new System.Drawing.Size(1000, 0);
 
-            // Etiqueta ruta archivo
             System.Windows.Forms.Label lblArchivo = new System.Windows.Forms.Label();
             lblArchivo.Text = "Archivo:";
             lblArchivo.AutoSize = true;
             lblArchivo.Location = new System.Drawing.Point(6, 22);
             lblArchivo.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
 
-            // TextBox ruta (solo visual, no tiene lógica propia)
             System.Windows.Forms.TextBox txtRutaArchivo = new System.Windows.Forms.TextBox();
             txtRutaArchivo.Name = "txtRutaArchivo";
             txtRutaArchivo.Location = new System.Drawing.Point(75, 20);
@@ -61,7 +50,6 @@
             txtRutaArchivo.ReadOnly = true;
             txtRutaArchivo.Font = new System.Drawing.Font("Courier New", 9);
 
-            // Cargar Archivo
             this.cargarArchivo = new System.Windows.Forms.Button();
             this.cargarArchivo.Name = "cargarArchivo";
             this.cargarArchivo.Text = "Cargar Archivo";
@@ -71,7 +59,6 @@
             this.cargarArchivo.Cursor = System.Windows.Forms.Cursors.Hand;
             this.cargarArchivo.Click += new System.EventHandler(this.cargarArchivo_Click);
 
-            // Checar Sintaxis
             this.checarSintax = new System.Windows.Forms.Button();
             this.checarSintax.Name = "checarSintax";
             this.checarSintax.Text = "Checar Sintaxis";
@@ -83,7 +70,6 @@
             this.checarSintax.Cursor = System.Windows.Forms.Cursors.Hand;
             this.checarSintax.Click += new System.EventHandler(this.checarSintax_Click);
 
-            // tabla → Generar TABSIM (lógica: tabla_Click)
             this.tabla = new System.Windows.Forms.Button();
             this.tabla.Name = "tabla";
             this.tabla.Text = "Generar TABSIM";
@@ -95,7 +81,6 @@
             this.tabla.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tabla.Click += new System.EventHandler(this.tabla_Click);
 
-            // Generar Codigo Objeto
             this.CodigoObj = new System.Windows.Forms.Button();
             this.CodigoObj.Name = "CodigoObj";
             this.CodigoObj.Text = "Generar Codigo Objeto";
@@ -107,7 +92,6 @@
             this.CodigoObj.Cursor = System.Windows.Forms.Cursors.Hand;
             this.CodigoObj.Click += new System.EventHandler(this.CodigoObj_Click);
 
-            //FileGenerattor → Generar FILE (lógica: FileGenerattor_Click)
             this.FileGenerattor = new System.Windows.Forms.Button();
             this.FileGenerattor.Name = "FileGenerattor";
             this.FileGenerattor.Text = "Generar Programa Objeto";
@@ -117,7 +101,6 @@
             this.FileGenerattor.Cursor = System.Windows.Forms.Cursors.Hand;
             this.FileGenerattor.Click += new System.EventHandler(this.FileGenerattor_Click);
 
-            // Botón Limpiar Limpia UI
             System.Windows.Forms.Button btnLimpiar = new System.Windows.Forms.Button();
             btnLimpiar.Name = "btnLimpiar";
             btnLimpiar.Text = "Limpiar";
@@ -138,31 +121,6 @@
                 numTamProg.Text = "0H";
             });
 
-            // label Tamaño del programa
-            this.tamProg = new System.Windows.Forms.Label();
-            this.tamProg.AutoSize = true;
-            this.tamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.tamProg.Location = new System.Drawing.Point(1530, 22);
-            this.tamProg.Text = "Tamaño del programa:";
-
-            this.numTamProg = new System.Windows.Forms.Label();
-            this.numTamProg.AutoSize = true;
-            this.numTamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.numTamProg.Location = new System.Drawing.Point(1750, 22);
-            this.numTamProg.Text = "0H";
-
-            panelSuperior.Controls.Add(lblArchivo);
-            panelSuperior.Controls.Add(txtRutaArchivo);
-            panelSuperior.Controls.Add(this.cargarArchivo);
-            panelSuperior.Controls.Add(this.checarSintax);
-            panelSuperior.Controls.Add(this.tabla);
-            panelSuperior.Controls.Add(this.CodigoObj);
-            panelSuperior.Controls.Add(this.FileGenerattor);
-            panelSuperior.Controls.Add(btnLimpiar);
-            panelSuperior.Controls.Add(this.tamProg);
-            panelSuperior.Controls.Add(this.numTamProg);
-
-            // Botón Ver Tabla de Bloques
             this.btnVerBloques = new System.Windows.Forms.Button();
             this.btnVerBloques.Name = "btnVerBloques";
             this.btnVerBloques.Text = "Ver Tabla Bloques";
@@ -173,7 +131,56 @@
             this.btnVerBloques.ForeColor = System.Drawing.Color.White;
             this.btnVerBloques.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnVerBloques.Click += new System.EventHandler(this.btnVerBloques_Click);
+
+            // Botón Ver TABSIM (ventana emergente)
+            this.btnVerTabSim = new System.Windows.Forms.Button();
+            this.btnVerTabSim.Name = "btnVerTabSim";
+            this.btnVerTabSim.Text = "Ver TABSIM";
+            this.btnVerTabSim.Location = new System.Drawing.Point(1525, 15);
+            this.btnVerTabSim.Size = new System.Drawing.Size(110, 40);
+            this.btnVerTabSim.Font = new System.Drawing.Font("Arial", 9);
+            this.btnVerTabSim.BackColor = System.Drawing.Color.SeaGreen;
+            this.btnVerTabSim.ForeColor = System.Drawing.Color.White;
+            this.btnVerTabSim.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVerTabSim.Click += new System.EventHandler(this.btnVerTabSim_Click);
+
+            // Botón Ver Código Objeto (ventana emergente)
+            this.btnVerCodObj = new System.Windows.Forms.Button();
+            this.btnVerCodObj.Name = "btnVerCodObj";
+            this.btnVerCodObj.Text = "Ver Cod. Objeto";
+            this.btnVerCodObj.Location = new System.Drawing.Point(1645, 15);
+            this.btnVerCodObj.Size = new System.Drawing.Size(120, 40);
+            this.btnVerCodObj.Font = new System.Drawing.Font("Arial", 9);
+            this.btnVerCodObj.BackColor = System.Drawing.Color.Goldenrod;
+            this.btnVerCodObj.ForeColor = System.Drawing.Color.White;
+            this.btnVerCodObj.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVerCodObj.Click += new System.EventHandler(this.btnVerCodObj_Click);
+
+            this.tamProg = new System.Windows.Forms.Label();
+            this.tamProg.AutoSize = true;
+            this.tamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+            this.tamProg.Location = new System.Drawing.Point(1780, 22);
+            this.tamProg.Text = "Tamaño del programa:";
+
+            this.numTamProg = new System.Windows.Forms.Label();
+            this.numTamProg.AutoSize = true;
+            this.numTamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
+            this.numTamProg.Location = new System.Drawing.Point(1960, 22);
+            this.numTamProg.Text = "0H";
+
+            panelSuperior.Controls.Add(lblArchivo);
+            panelSuperior.Controls.Add(txtRutaArchivo);
+            panelSuperior.Controls.Add(this.cargarArchivo);
+            panelSuperior.Controls.Add(this.checarSintax);
+            panelSuperior.Controls.Add(this.tabla);
+            panelSuperior.Controls.Add(this.CodigoObj);
+            panelSuperior.Controls.Add(this.FileGenerattor);
+            panelSuperior.Controls.Add(btnLimpiar);
             panelSuperior.Controls.Add(this.btnVerBloques);
+            panelSuperior.Controls.Add(this.btnVerTabSim);
+            panelSuperior.Controls.Add(this.btnVerCodObj);
+            panelSuperior.Controls.Add(this.tamProg);
+            panelSuperior.Controls.Add(this.numTamProg);
 
             // ============================================================================
             // SPLITTER PRINCIPAL (izquierda | derecha)
@@ -193,7 +200,6 @@
             splitIzquierdo.Orientation = System.Windows.Forms.Orientation.Horizontal;
             splitIzquierdo.SplitterDistance = 200;
 
-            // Panel código fuente
             System.Windows.Forms.Panel panelCodigo = new System.Windows.Forms.Panel();
             panelCodigo.Dock = System.Windows.Forms.DockStyle.Fill;
             panelCodigo.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -219,7 +225,6 @@
             panelCodigo.Controls.Add(this.rtbCode);
             panelCodigo.Controls.Add(lblCodigo);
 
-            // Panel errores
             System.Windows.Forms.Panel panelErrores = new System.Windows.Forms.Panel();
             panelErrores.Dock = System.Windows.Forms.DockStyle.Fill;
             panelErrores.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -249,34 +254,9 @@
             splitIzquierdo.Panel2.Controls.Add(panelErrores);
 
             // ============================================================================
-            // PANEL DERECHO: TABSIM | tabla de archivo Intermedio
+            // INICIALIZACIÓN EN MEMORIA: TablaSimbolos_Panel y rtbObjArchivo
+            // (no se añaden al layout principal; se muestran via ventanas emergentes)
             // ============================================================================
-
-            System.Windows.Forms.SplitContainer splitDerecho = new System.Windows.Forms.SplitContainer();
-            splitDerecho.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitDerecho.Orientation = System.Windows.Forms.Orientation.Vertical;
-            splitDerecho.SplitterDistance = 30;
-
-            // ---- TABSIM + Archivo Objeto (split horizontal dentro de Panel1) ----
-            System.Windows.Forms.SplitContainer splitSim = new System.Windows.Forms.SplitContainer();
-            splitSim.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitSim.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            splitSim.SplitterDistance = 55; // 55% TABSIM, 45% OBJ
-
-            //TABSIM
-            System.Windows.Forms.Panel panelSim = new System.Windows.Forms.Panel();
-            panelSim.Dock = System.Windows.Forms.DockStyle.Fill;
-            panelSim.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            System.Windows.Forms.Label lblSim = new System.Windows.Forms.Label();
-            lblSim.Text = "TABLA DE SÍMBOLOS (TABSIM)";
-            lblSim.Dock = System.Windows.Forms.DockStyle.Top;
-            lblSim.Height = 28;
-            lblSim.BackColor = System.Drawing.Color.LightGreen;
-            lblSim.ForeColor = System.Drawing.Color.DarkGreen;
-            lblSim.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
-            lblSim.Padding = new System.Windows.Forms.Padding(5);
-            lblSim.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 
             this.TablaSimbolos_Panel = new System.Windows.Forms.DataGridView();
             this.Simbolo = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -321,27 +301,8 @@
 
             ((System.ComponentModel.ISupportInitialize)(this.TablaSimbolos_Panel)).EndInit();
 
-            panelSim.Controls.Add(this.TablaSimbolos_Panel);
-            panelSim.Controls.Add(lblSim);
-
-            // Panel código objeto (archivo .obj)
-            System.Windows.Forms.Panel panelObjArch = new System.Windows.Forms.Panel();
-            panelObjArch.Dock = System.Windows.Forms.DockStyle.Fill;
-            panelObjArch.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-
-            System.Windows.Forms.Label lblObjArch = new System.Windows.Forms.Label();
-            lblObjArch.Text = "CÓDIGO OBJETO (.OBJ)";
-            lblObjArch.Dock = System.Windows.Forms.DockStyle.Top;
-            lblObjArch.Height = 28;
-            lblObjArch.BackColor = System.Drawing.Color.Goldenrod;
-            lblObjArch.ForeColor = System.Drawing.Color.White;
-            lblObjArch.Font = new System.Drawing.Font("Arial", 10, System.Drawing.FontStyle.Bold);
-            lblObjArch.Padding = new System.Windows.Forms.Padding(5);
-            lblObjArch.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-
             this.rtbObjArchivo = new System.Windows.Forms.RichTextBox();
             this.rtbObjArchivo.Name = "rtbObjArchivo";
-            this.rtbObjArchivo.Dock = System.Windows.Forms.DockStyle.Fill;
             this.rtbObjArchivo.ReadOnly = true;
             this.rtbObjArchivo.Font = new System.Drawing.Font("Courier New", 9);
             this.rtbObjArchivo.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
@@ -349,13 +310,10 @@
             this.rtbObjArchivo.ForeColor = System.Drawing.Color.LimeGreen;
             this.rtbObjArchivo.Text = "";
 
-            panelObjArch.Controls.Add(this.rtbObjArchivo);
-            panelObjArch.Controls.Add(lblObjArch);
+            // ============================================================================
+            // PANEL DERECHO: tabla de resultados (ocupa todo el panel derecho)
+            // ============================================================================
 
-            splitSim.Panel1.Controls.Add(panelSim);
-            splitSim.Panel2.Controls.Add(panelObjArch);
-
-            // tabla intermedia / resultados
             System.Windows.Forms.Panel panelInt = new System.Windows.Forms.Panel();
             panelInt.Dock = System.Windows.Forms.DockStyle.Fill;
             panelInt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -475,15 +433,12 @@
             panelInt.Controls.Add(this.panelResultados);
             panelInt.Controls.Add(lblInt);
 
-            splitDerecho.Panel1.Controls.Add(splitSim);
-            splitDerecho.Panel2.Controls.Add(panelInt);
-
             // ============================================================================
             // ENSAMBLAR TODO
             // ============================================================================
 
             splitPrincipal.Panel1.Controls.Add(splitIzquierdo);
-            splitPrincipal.Panel2.Controls.Add(splitDerecho);
+            splitPrincipal.Panel2.Controls.Add(panelInt);
 
             this.Controls.Add(splitPrincipal);
             this.Controls.Add(panelSuperior);
@@ -519,6 +474,8 @@
         private System.Windows.Forms.Button CodigoObj;
         private System.Windows.Forms.Button FileGenerattor;
         private System.Windows.Forms.Button btnVerBloques;
+        private System.Windows.Forms.Button btnVerTabSim;
+        private System.Windows.Forms.Button btnVerCodObj;
         private System.Windows.Forms.RichTextBox rtbObjArchivo;
     }
 }

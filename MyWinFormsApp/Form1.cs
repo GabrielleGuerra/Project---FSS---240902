@@ -2296,5 +2296,110 @@ namespace MyWinFormsApp
         private void FileGenerattor_Click(object sender, EventArgs e) => objArchivo();
         #endregion
 
+
+        // ---- Ver TABSIM (ventana emergente) ----
+        private void btnVerTabSim_Click(object sender, EventArgs e)
+        {
+            if (TablaSimbolos_Panel.Rows.Count == 0)
+            {
+                MessageBox.Show("No hay símbolos en TABSIM. Ejecute Paso 1 primero.",
+                                "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var win = new Form();
+            win.Text = "Tabla de Símbolos (TABSIM)";
+            win.Size = new System.Drawing.Size(560, 460);
+            win.StartPosition = FormStartPosition.CenterParent;
+            win.FormBorderStyle = FormBorderStyle.FixedDialog;
+            win.MaximizeBox = false;
+            win.MinimizeBox = false;
+
+            var lbl = new Label();
+            lbl.Text = "TABLA DE SÍMBOLOS (TABSIM)";
+            lbl.Dock = DockStyle.Top;
+            lbl.Height = 30;
+            lbl.BackColor = Color.LightGreen;
+            lbl.ForeColor = Color.DarkGreen;
+            lbl.Font = new Font("Arial", 10, FontStyle.Bold);
+            lbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+
+            var dgv = new DataGridView();
+            dgv.Dock = DockStyle.Fill;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.ReadOnly = true;
+            dgv.Font = new Font("Courier New", 9);
+            dgv.BackgroundColor = Color.White;
+            dgv.GridColor = Color.LightGray;
+            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+
+            // Copiar columnas de TablaSimbolos_Panel
+            foreach (DataGridViewColumn col in TablaSimbolos_Panel.Columns)
+            {
+                dgv.Columns.Add(new DataGridViewTextBoxColumn
+                { HeaderText = col.HeaderText, ReadOnly = true });
+            }
+
+            // Copiar filas
+            foreach (DataGridViewRow row in TablaSimbolos_Panel.Rows)
+            {
+                var newRow = new DataGridViewRow();
+                newRow.CreateCells(dgv);
+                for (int ci = 0; ci < dgv.Columns.Count && ci < row.Cells.Count; ci++)
+                    newRow.Cells[ci].Value = row.Cells[ci].Value;
+                dgv.Rows.Add(newRow);
+            }
+
+            win.Controls.Add(dgv);
+            win.Controls.Add(lbl);
+            win.ShowDialog(this);
+        }
+
+        // ---- Ver Código Objeto (ventana emergente) ----
+        private void btnVerCodObj_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(rtbObjArchivo.Text))
+            {
+                MessageBox.Show("No hay código objeto. Ejecute 'Generar Programa Objeto' primero.",
+                                "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var win = new Form();
+            win.Text = "Código Objeto (.OBJ)";
+            win.Size = new System.Drawing.Size(600, 460);
+            win.StartPosition = FormStartPosition.CenterParent;
+            win.FormBorderStyle = FormBorderStyle.FixedDialog;
+            win.MaximizeBox = false;
+            win.MinimizeBox = false;
+
+            var lbl = new Label();
+            lbl.Text = "CÓDIGO OBJETO (.OBJ)";
+            lbl.Dock = DockStyle.Top;
+            lbl.Height = 30;
+            lbl.BackColor = Color.Goldenrod;
+            lbl.ForeColor = Color.White;
+            lbl.Font = new Font("Arial", 10, FontStyle.Bold);
+            lbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+
+            var rtb = new RichTextBox();
+            rtb.Dock = DockStyle.Fill;
+            rtb.ReadOnly = true;
+            rtb.Font = new Font("Courier New", 10);
+            rtb.BackColor = Color.Black;
+            rtb.ForeColor = Color.LimeGreen;
+            rtb.ScrollBars = RichTextBoxScrollBars.Both;
+            rtb.WordWrap = false;
+
+            // Copiar contenido RTF (preserva colores H/T/M/E)
+            rtb.Rtf = rtbObjArchivo.Rtf;
+
+            win.Controls.Add(rtb);
+            win.Controls.Add(lbl);
+            win.ShowDialog(this);
+        }
+
     }
 }
