@@ -119,6 +119,8 @@
                 panelResultados.Rows.Clear();
                 txtRutaArchivo.Clear();
                 numTamProg.Text = "0H";
+                // No se pueden limpiar Secciones aquí (campo de Form1), 
+                // pero se limpian en tabla_Click al ejecutar Paso 1.
             });
 
             this.btnVerBloques = new System.Windows.Forms.Button();
