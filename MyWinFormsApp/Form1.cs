@@ -820,9 +820,7 @@ namespace MyWinFormsApp
                 r.Cells[1].Value = "---";
                 r.Cells[2].Value = noBlqActual.ToString();
 
-                // ══════════════════════════════════════════════════
                 //  PRIMERA LÍNEA (START)
-                // ══════════════════════════════════════════════════
                 if (i == 0)
                 {
                     r.Cells[7].Value = "---";
@@ -856,9 +854,7 @@ namespace MyWinFormsApp
                     continue;
                 }
 
-                // ══════════════════════════════════════════════════
                 //  ÚLTIMA LÍNEA (END)
-                // ══════════════════════════════════════════════════
                 if (i == codigo.Count - 1)
                 {
                     r.Cells[3].Value = seccionActual.EsPrincipal
@@ -900,9 +896,7 @@ namespace MyWinFormsApp
                     continue;
                 }
 
-                // ══════════════════════════════════════════════════
                 //  CSECT — inicio de nueva sección de control
-                // ══════════════════════════════════════════════════
                 if (t.Any(tk => tk.Type == 34))
                 {
                     // Finalizar la sección actual antes de crear la nueva
@@ -921,9 +915,7 @@ namespace MyWinFormsApp
                     continue;
                 }
 
-                // ══════════════════════════════════════════════════
                 //  EXTREF — insertar símbolos externos en TabSim
-                // ══════════════════════════════════════════════════
                 if (t.Any(tk => tk.Type == 36))
                 {
                     // Validar que esté inmediatamente después de START/CSECT/otro EXTDEF/EXTREF
@@ -956,9 +948,7 @@ namespace MyWinFormsApp
                     continue;
                 }
 
-                // ══════════════════════════════════════════════════
                 //  EXTDEF — solo validar sintaxis en Paso 1
-                // ══════════════════════════════════════════════════
                 if (t.Any(tk => tk.Type == 35))
                 {
                     bool zonaOk = EstaEnZonaExtDef(i);
@@ -980,9 +970,7 @@ namespace MyWinFormsApp
                     continue;
                 }
 
-                // ══════════════════════════════════════════════════
                 //  LÍNEAS INTERMEDIAS
-                // ══════════════════════════════════════════════════
                 {
                     r.Cells[7].Value = "---";
                     bool ErrorSimboloDuplicado = false;
@@ -2524,13 +2512,13 @@ namespace MyWinFormsApp
                 int filaFin = (sec == Secciones.Last()) ? total - 1 : sec.FilaFin;
                 if (filaFin < 0) filaFin = total - 1;
 
-                // ── H ──────────────────────────────────────────────
+                // Registro H
                 string nomSec = sec.Nombre.Length > 6 ? sec.Nombre.Substring(0, 6) : sec.Nombre.PadRight(6);
                 var ords = sec.TabBloques.Values.OrderBy(b => b.NoBloque).ToList();
                 int longSec = ords.Count > 0 ? ords.Last().DirInicio + ords.Last().Longitud : 0;
                 lineas.Add($"H{nomSec}000000{longSec:X6}");
 
-                // ── D y R (en orden de aparición en el código fuente) ──
+                // Registro D y R (en orden de aparición en el código fuente)
                 for (int fi = filaIni; fi <= filaFin; fi++)
                 {
                     if (fi >= total) break;
@@ -2562,7 +2550,7 @@ namespace MyWinFormsApp
                     }
                 }
 
-                // ── T ──────────────────────────────────────────────
+                // registro T
                 int i = filaIni;
                 while (i <= filaFin && i < total)
                 {
@@ -2601,7 +2589,7 @@ namespace MyWinFormsApp
                     else i++;
                 }
 
-                // ── M ──────────────────────────────────────────────
+                // Registro M
                 for (int j = filaIni; j <= filaFin && j < total; j++)
                 {
                     string cod = panelResultados.Rows[j].Cells[8]?.Value?.ToString() ?? "";
@@ -2609,7 +2597,7 @@ namespace MyWinFormsApp
                     string fmt = panelResultados.Rows[j].Cells[1]?.Value?.ToString() ?? "";
                     int cpAbsM = CPAbsolutoFila(j);
 
-                    // *R → relocalización por inicio de sección
+                    // *R -> relocalización por inicio de sección
                     if (cod.Contains("*R"))
                     {
                         if (fmt == "4")
@@ -2617,7 +2605,7 @@ namespace MyWinFormsApp
                         else if (ins2 == "WORD")
                             lineas.Add($"M{cpAbsM:X6}06+{sec.Nombre.Substring(0, Math.Min(6, sec.Nombre.Length))}");
                     }
-                    // *SE → símbolo externo específico
+                    // *SE -> símbolo externo específico
                     if (cod.Contains("*SE"))
                     {
                         // Determinar qué símbolo(s) externos aplican
@@ -2626,7 +2614,7 @@ namespace MyWinFormsApp
                     }
                 }
 
-                // ── E ──────────────────────────────────────────────
+                // Registro E
                 if (sec.EsPrincipal)
                 {
                     string dirEjecucion = "000000";
@@ -2808,6 +2796,13 @@ namespace MyWinFormsApp
             win.Controls.Add(lbl);
             win.Controls.Add(panelTop);
             win.ShowDialog(this);
+        }
+
+        // --- Cargador Ligador Button event ---
+        private void ligadorBtn_Click(object sender, EventArgs e)
+        {
+            var selector = new FormOrdenArchivos(new List<string>());
+            selector.Show();
         }
 
         // ---- Ver Código Objeto (ventana emergente) ----

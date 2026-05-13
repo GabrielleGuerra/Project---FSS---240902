@@ -25,7 +25,7 @@
             this.WindowState = System.Windows.Forms.FormWindowState.Normal;
 
             // ============================================================================
-            // PANEL SUPERIOR - CONTROLES
+            // PANEL SUPERIOR 
             // ============================================================================
 
             System.Windows.Forms.Panel panelSuperior = new System.Windows.Forms.Panel();
@@ -33,8 +33,6 @@
             panelSuperior.Height = 70;
             panelSuperior.BackColor = System.Drawing.Color.LightGray;
             panelSuperior.Padding = new System.Windows.Forms.Padding(10);
-            panelSuperior.AutoScroll = true; // Activa las barras de scroll automáticas
-            panelSuperior.AutoScrollMinSize = new System.Drawing.Size(1000, 0);
 
             System.Windows.Forms.Label lblArchivo = new System.Windows.Forms.Label();
             lblArchivo.Text = "Archivo:";
@@ -49,6 +47,7 @@
             txtRutaArchivo.Height = 28;
             txtRutaArchivo.ReadOnly = true;
             txtRutaArchivo.Font = new System.Drawing.Font("Courier New", 9);
+            txtRutaArchivo.Anchor = System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Top;
 
             this.cargarArchivo = new System.Windows.Forms.Button();
             this.cargarArchivo.Name = "cargarArchivo";
@@ -59,52 +58,10 @@
             this.cargarArchivo.Cursor = System.Windows.Forms.Cursors.Hand;
             this.cargarArchivo.Click += new System.EventHandler(this.cargarArchivo_Click);
 
-            this.checarSintax = new System.Windows.Forms.Button();
-            this.checarSintax.Name = "checarSintax";
-            this.checarSintax.Text = "Checar Sintaxis";
-            this.checarSintax.Location = new System.Drawing.Point(715, 15);
-            this.checarSintax.Size = new System.Drawing.Size(120, 40);
-            this.checarSintax.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
-            this.checarSintax.BackColor = System.Drawing.Color.LimeGreen;
-            this.checarSintax.ForeColor = System.Drawing.Color.White;
-            this.checarSintax.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.checarSintax.Click += new System.EventHandler(this.checarSintax_Click);
-
-            this.tabla = new System.Windows.Forms.Button();
-            this.tabla.Name = "tabla";
-            this.tabla.Text = "Generar TABSIM";
-            this.tabla.Location = new System.Drawing.Point(845, 15);
-            this.tabla.Size = new System.Drawing.Size(140, 40);
-            this.tabla.Font = new System.Drawing.Font("Arial", 9);
-            this.tabla.BackColor = System.Drawing.Color.SteelBlue;
-            this.tabla.ForeColor = System.Drawing.Color.White;
-            this.tabla.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.tabla.Click += new System.EventHandler(this.tabla_Click);
-
-            this.CodigoObj = new System.Windows.Forms.Button();
-            this.CodigoObj.Name = "CodigoObj";
-            this.CodigoObj.Text = "Generar Codigo Objeto";
-            this.CodigoObj.Location = new System.Drawing.Point(995, 15);
-            this.CodigoObj.Size = new System.Drawing.Size(140, 40);
-            this.CodigoObj.Font = new System.Drawing.Font("Arial", 9);
-            this.CodigoObj.BackColor = System.Drawing.Color.DarkOrange;
-            this.CodigoObj.ForeColor = System.Drawing.Color.White;
-            this.CodigoObj.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.CodigoObj.Click += new System.EventHandler(this.CodigoObj_Click);
-
-            this.FileGenerattor = new System.Windows.Forms.Button();
-            this.FileGenerattor.Name = "FileGenerattor";
-            this.FileGenerattor.Text = "Generar Programa Objeto";
-            this.FileGenerattor.Location = new System.Drawing.Point(1145, 15);
-            this.FileGenerattor.Size = new System.Drawing.Size(120, 40);
-            this.FileGenerattor.Font = new System.Drawing.Font("Arial", 9);
-            this.FileGenerattor.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.FileGenerattor.Click += new System.EventHandler(this.FileGenerattor_Click);
-
             System.Windows.Forms.Button btnLimpiar = new System.Windows.Forms.Button();
             btnLimpiar.Name = "btnLimpiar";
             btnLimpiar.Text = "Limpiar";
-            btnLimpiar.Location = new System.Drawing.Point(1275, 15);
+            btnLimpiar.Location = new System.Drawing.Point(715, 15);
             btnLimpiar.Size = new System.Drawing.Size(100, 40);
             btnLimpiar.Font = new System.Drawing.Font("Arial", 9);
             btnLimpiar.BackColor = System.Drawing.Color.Orange;
@@ -119,82 +76,218 @@
                 panelResultados.Rows.Clear();
                 txtRutaArchivo.Clear();
                 numTamProg.Text = "0H";
-                // No se pueden limpiar Secciones aquí (campo de Form1), 
-                // pero se limpian en tabla_Click al ejecutar Paso 1.
             });
 
-            this.btnVerBloques = new System.Windows.Forms.Button();
-            this.btnVerBloques.Name = "btnVerBloques";
-            this.btnVerBloques.Text = "Ver Tabla Bloques";
-            this.btnVerBloques.Location = new System.Drawing.Point(1385, 15);
-            this.btnVerBloques.Size = new System.Drawing.Size(130, 40);
-            this.btnVerBloques.Font = new System.Drawing.Font("Arial", 9);
-            this.btnVerBloques.BackColor = System.Drawing.Color.MediumPurple;
-            this.btnVerBloques.ForeColor = System.Drawing.Color.White;
-            this.btnVerBloques.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnVerBloques.Click += new System.EventHandler(this.btnVerBloques_Click);
-
-            // Botón Ver TABSIM (ventana emergente)
-            this.btnVerTabSim = new System.Windows.Forms.Button();
-            this.btnVerTabSim.Name = "btnVerTabSim";
-            this.btnVerTabSim.Text = "Ver TABSIM";
-            this.btnVerTabSim.Location = new System.Drawing.Point(1525, 15);
-            this.btnVerTabSim.Size = new System.Drawing.Size(110, 40);
-            this.btnVerTabSim.Font = new System.Drawing.Font("Arial", 9);
-            this.btnVerTabSim.BackColor = System.Drawing.Color.SeaGreen;
-            this.btnVerTabSim.ForeColor = System.Drawing.Color.White;
-            this.btnVerTabSim.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnVerTabSim.Click += new System.EventHandler(this.btnVerTabSim_Click);
-
-            // Botón Ver Código Objeto (ventana emergente)
-            this.btnVerCodObj = new System.Windows.Forms.Button();
-            this.btnVerCodObj.Name = "btnVerCodObj";
-            this.btnVerCodObj.Text = "Ver Cod. Objeto";
-            this.btnVerCodObj.Location = new System.Drawing.Point(1645, 15);
-            this.btnVerCodObj.Size = new System.Drawing.Size(120, 40);
-            this.btnVerCodObj.Font = new System.Drawing.Font("Arial", 9);
-            this.btnVerCodObj.BackColor = System.Drawing.Color.Goldenrod;
-            this.btnVerCodObj.ForeColor = System.Drawing.Color.White;
-            this.btnVerCodObj.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnVerCodObj.Click += new System.EventHandler(this.btnVerCodObj_Click);
-
+            // Label tamaño anclado a la derecha
             this.tamProg = new System.Windows.Forms.Label();
             this.tamProg.AutoSize = true;
             this.tamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.tamProg.Location = new System.Drawing.Point(1780, 22);
-            this.tamProg.Text = "Tamaño del programa:";
+            this.tamProg.Text = "Tamaño:";
+            this.tamProg.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
 
             this.numTamProg = new System.Windows.Forms.Label();
             this.numTamProg.AutoSize = true;
             this.numTamProg.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Bold);
-            this.numTamProg.Location = new System.Drawing.Point(1960, 22);
             this.numTamProg.Text = "0H";
+            this.numTamProg.Anchor = System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right;
+
+            // Posicionamos tamProg y numTamProg a la derecha al cargar
+            panelSuperior.SizeChanged += (s, ev) =>
+            {
+                int rightMargin = 10;
+                this.numTamProg.Location = new System.Drawing.Point(
+                    panelSuperior.ClientSize.Width - rightMargin - this.numTamProg.Width,
+                    22);
+                this.tamProg.Location = new System.Drawing.Point(
+                    this.numTamProg.Left - this.tamProg.Width - 5,
+                    22);
+            };
 
             panelSuperior.Controls.Add(lblArchivo);
             panelSuperior.Controls.Add(txtRutaArchivo);
             panelSuperior.Controls.Add(this.cargarArchivo);
-            panelSuperior.Controls.Add(this.checarSintax);
-            panelSuperior.Controls.Add(this.tabla);
-            panelSuperior.Controls.Add(this.CodigoObj);
-            panelSuperior.Controls.Add(this.FileGenerattor);
             panelSuperior.Controls.Add(btnLimpiar);
-            panelSuperior.Controls.Add(this.btnVerBloques);
-            panelSuperior.Controls.Add(this.btnVerTabSim);
-            panelSuperior.Controls.Add(this.btnVerCodObj);
             panelSuperior.Controls.Add(this.tamProg);
             panelSuperior.Controls.Add(this.numTamProg);
 
             // ============================================================================
-            // SPLITTER PRINCIPAL (izquierda | derecha)
+            // PANEL MENÚ IZQUIERDO - Botones 
+            // ============================================================================
+
+            System.Windows.Forms.Panel panelMenu = new System.Windows.Forms.Panel();
+            panelMenu.Dock = System.Windows.Forms.DockStyle.Fill;
+            panelMenu.BackColor = System.Drawing.Color.LightGray;
+            panelMenu.Padding = new System.Windows.Forms.Padding(8);
+
+            System.Windows.Forms.Label lblMenu = new System.Windows.Forms.Label();
+            lblMenu.Text = "ACCIONES";
+            lblMenu.Dock = System.Windows.Forms.DockStyle.Top;
+            lblMenu.Height = 30;
+            lblMenu.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            lblMenu.ForeColor = System.Drawing.Color.White;
+            lblMenu.BackColor = System.Drawing.Color.Gray;
+            lblMenu.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            lblMenu.Padding = new System.Windows.Forms.Padding(0);
+
+            // Función helper para crear botones del menú
+            System.Drawing.Size btnMenuSize = new System.Drawing.Size(154, 44);
+            int btnMenuX = 8;
+            int btnMenuStartY = 40;
+            int btnMenuGap = 52;
+
+            // ---- Checar Sintaxis ----
+            this.checarSintax = new System.Windows.Forms.Button();
+            this.checarSintax.Name = "checarSintax";
+            this.checarSintax.Text = "Checar Sintaxis";
+            this.checarSintax.Location = new System.Drawing.Point(btnMenuX, btnMenuStartY);
+            this.checarSintax.Size = btnMenuSize;
+            this.checarSintax.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            this.checarSintax.BackColor = System.Drawing.Color.LimeGreen;
+            this.checarSintax.ForeColor = System.Drawing.Color.White;
+            this.checarSintax.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checarSintax.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.checarSintax.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.checarSintax.Click += new System.EventHandler(this.checarSintax_Click);
+
+            // ---- Generar TABSIM ----
+            this.tabla = new System.Windows.Forms.Button();
+            this.tabla.Name = "tabla";
+            this.tabla.Text = "Generar TABSIM";
+            this.tabla.Location = new System.Drawing.Point(btnMenuX, btnMenuStartY + btnMenuGap * 1);
+            this.tabla.Size = btnMenuSize;
+            this.tabla.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            this.tabla.BackColor = System.Drawing.Color.SteelBlue;
+            this.tabla.ForeColor = System.Drawing.Color.White;
+            this.tabla.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.tabla.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.tabla.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.tabla.Click += new System.EventHandler(this.tabla_Click);
+
+            // ---- Generar Codigo Objeto ----
+            this.CodigoObj = new System.Windows.Forms.Button();
+            this.CodigoObj.Name = "CodigoObj";
+            this.CodigoObj.Text = "Generar Cod. Objeto";
+            this.CodigoObj.Location = new System.Drawing.Point(btnMenuX, btnMenuStartY + btnMenuGap * 2);
+            this.CodigoObj.Size = btnMenuSize;
+            this.CodigoObj.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            this.CodigoObj.BackColor = System.Drawing.Color.DarkOrange;
+            this.CodigoObj.ForeColor = System.Drawing.Color.White;
+            this.CodigoObj.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.CodigoObj.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.CodigoObj.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.CodigoObj.Click += new System.EventHandler(this.CodigoObj_Click);
+
+            // ---- Generar Programa Objeto ----
+            this.FileGenerattor = new System.Windows.Forms.Button();
+            this.FileGenerattor.Name = "FileGenerattor";
+            this.FileGenerattor.Text = "Generar Prog. Objeto";
+            this.FileGenerattor.Location = new System.Drawing.Point(btnMenuX, btnMenuStartY + btnMenuGap * 3);
+            this.FileGenerattor.Size = btnMenuSize;
+            this.FileGenerattor.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            this.FileGenerattor.BackColor = System.Drawing.Color.FromArgb(100, 80, 160);
+            this.FileGenerattor.ForeColor = System.Drawing.Color.White;
+            this.FileGenerattor.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.FileGenerattor.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.FileGenerattor.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.FileGenerattor.Click += new System.EventHandler(this.FileGenerattor_Click);
+
+            // Separador
+            System.Windows.Forms.Label lblSep = new System.Windows.Forms.Label();
+            lblSep.Location = new System.Drawing.Point(btnMenuX, btnMenuStartY + btnMenuGap * 4);
+            lblSep.Size = new System.Drawing.Size(154, 2);
+            lblSep.BackColor = System.Drawing.Color.LightGray;
+
+            // ---- Ver Tabla de Bloques ----
+            this.btnVerBloques = new System.Windows.Forms.Button();
+            this.btnVerBloques.Name = "btnVerBloques";
+            this.btnVerBloques.Text = "Ver Tabla Bloques";
+            this.btnVerBloques.Location = new System.Drawing.Point(btnMenuX, btnMenuStartY + btnMenuGap * 4 + 10);
+            this.btnVerBloques.Size = btnMenuSize;
+            this.btnVerBloques.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            this.btnVerBloques.BackColor = System.Drawing.Color.MediumPurple;
+            this.btnVerBloques.ForeColor = System.Drawing.Color.White;
+            this.btnVerBloques.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVerBloques.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVerBloques.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.btnVerBloques.Click += new System.EventHandler(this.btnVerBloques_Click);
+
+            // ---- Ver TABSIM ----
+            this.btnVerTabSim = new System.Windows.Forms.Button();
+            this.btnVerTabSim.Name = "btnVerTabSim";
+            this.btnVerTabSim.Text = "Ver TABSIM";
+            this.btnVerTabSim.Location = new System.Drawing.Point(btnMenuX, btnMenuStartY + btnMenuGap * 5 + 10);
+            this.btnVerTabSim.Size = btnMenuSize;
+            this.btnVerTabSim.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            this.btnVerTabSim.BackColor = System.Drawing.Color.SeaGreen;
+            this.btnVerTabSim.ForeColor = System.Drawing.Color.White;
+            this.btnVerTabSim.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVerTabSim.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVerTabSim.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.btnVerTabSim.Click += new System.EventHandler(this.btnVerTabSim_Click);
+
+            // ---- Ver Codigo Objeto ----
+            this.btnVerCodObj = new System.Windows.Forms.Button();
+            this.btnVerCodObj.Name = "btnVerCodObj";
+            this.btnVerCodObj.Text = "Ver Cod. Objeto";
+            this.btnVerCodObj.Location = new System.Drawing.Point(btnMenuX, btnMenuStartY + btnMenuGap * 6 + 10);
+            this.btnVerCodObj.Size = btnMenuSize;
+            this.btnVerCodObj.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            this.btnVerCodObj.BackColor = System.Drawing.Color.Goldenrod;
+            this.btnVerCodObj.ForeColor = System.Drawing.Color.White;
+            this.btnVerCodObj.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnVerCodObj.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnVerCodObj.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.btnVerCodObj.Click += new System.EventHandler(this.btnVerCodObj_Click);
+
+            // ---- Cargador-Ligador ----
+            this.ligadorBtn = new System.Windows.Forms.Button();
+            this.ligadorBtn.Name = "ligadorBtn";
+            this.ligadorBtn.Text = "Cargador-Ligador";
+            this.ligadorBtn.Location = new System.Drawing.Point(btnMenuX, btnMenuStartY + btnMenuGap * 7 + 10);
+            this.ligadorBtn.Size = btnMenuSize;
+            this.ligadorBtn.Font = new System.Drawing.Font("Arial", 9, System.Drawing.FontStyle.Bold);
+            this.ligadorBtn.BackColor = System.Drawing.Color.FromArgb(25, 50, 130);
+            this.ligadorBtn.ForeColor = System.Drawing.Color.White;
+            this.ligadorBtn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ligadorBtn.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.ligadorBtn.Click += new System.EventHandler(this.ligadorBtn_Click);
+
+            panelMenu.Controls.Add(lblMenu);
+            panelMenu.Controls.Add(this.checarSintax);
+            panelMenu.Controls.Add(this.tabla);
+            panelMenu.Controls.Add(this.CodigoObj);
+            panelMenu.Controls.Add(this.FileGenerattor);
+            panelMenu.Controls.Add(lblSep);
+            panelMenu.Controls.Add(this.btnVerBloques);
+            panelMenu.Controls.Add(this.btnVerTabSim);
+            panelMenu.Controls.Add(this.btnVerCodObj);
+            panelMenu.Controls.Add(this.ligadorBtn);
+
+            // ============================================================================
+            // SPLITTER PRINCIPAL (izquierda = menú+código | derecha = resultados)
             // ============================================================================
 
             System.Windows.Forms.SplitContainer splitPrincipal = new System.Windows.Forms.SplitContainer();
             splitPrincipal.Dock = System.Windows.Forms.DockStyle.Fill;
-            splitPrincipal.SplitterDistance = 8;
+            splitPrincipal.SplitterDistance = 850;
             splitPrincipal.Orientation = System.Windows.Forms.Orientation.Vertical;
 
             // ============================================================================
-            // PANEL IZQUIERDO: código fuente (rtbCode) + errores (rtbErrors)
+            // SPLIT INTERIOR IZQUIERDO: Menú | Código+Errores
+            // ============================================================================
+
+            System.Windows.Forms.SplitContainer splitMenuCodigo = new System.Windows.Forms.SplitContainer();
+            splitMenuCodigo.Dock = System.Windows.Forms.DockStyle.Fill;
+            splitMenuCodigo.Orientation = System.Windows.Forms.Orientation.Vertical;
+            splitMenuCodigo.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            splitMenuCodigo.SplitterDistance = 170;
+
+            // Panel1 del splitMenuCodigo → panelMenu
+            splitMenuCodigo.Panel1.Controls.Add(panelMenu);
+            splitMenuCodigo.Panel1MinSize = 170;
+
+            // ============================================================================
+            // SPLIT VERTICAL: código fuente (arriba) + errores (abajo)
             // ============================================================================
 
             System.Windows.Forms.SplitContainer splitIzquierdo = new System.Windows.Forms.SplitContainer();
@@ -255,9 +348,11 @@
             splitIzquierdo.Panel1.Controls.Add(panelCodigo);
             splitIzquierdo.Panel2.Controls.Add(panelErrores);
 
+            // Panel2 del splitMenuCodigo → splitIzquierdo (código + errores)
+            splitMenuCodigo.Panel2.Controls.Add(splitIzquierdo);
+
             // ============================================================================
             // INICIALIZACIÓN EN MEMORIA: TablaSimbolos_Panel y rtbObjArchivo
-            // (no se añaden al layout principal; se muestran via ventanas emergentes)
             // ============================================================================
 
             this.TablaSimbolos_Panel = new System.Windows.Forms.DataGridView();
@@ -313,7 +408,7 @@
             this.rtbObjArchivo.Text = "";
 
             // ============================================================================
-            // PANEL DERECHO: tabla de resultados (ocupa todo el panel derecho)
+            // PANEL DERECHO: tabla de resultados
             // ============================================================================
 
             System.Windows.Forms.Panel panelInt = new System.Windows.Forms.Panel();
@@ -321,7 +416,7 @@
             panelInt.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 
             System.Windows.Forms.Label lblInt = new System.Windows.Forms.Label();
-            lblInt.Text = "RESULTADOS DEL ANÁLISIS";
+            lblInt.Text = "RESULTADOS DEL ANÁLISIS - ARCHIVO INTERMEDIO";
             lblInt.Dock = System.Windows.Forms.DockStyle.Top;
             lblInt.Height = 28;
             lblInt.BackColor = System.Drawing.Color.LightSteelBlue;
@@ -439,7 +534,9 @@
             // ENSAMBLAR TODO
             // ============================================================================
 
-            splitPrincipal.Panel1.Controls.Add(splitIzquierdo);
+            // splitPrincipal.Panel1 → splitMenuCodigo (menú izquierdo + código/errores)
+            splitPrincipal.Panel1.Controls.Add(splitMenuCodigo);
+            // splitPrincipal.Panel2 → tabla de resultados
             splitPrincipal.Panel2.Controls.Add(panelInt);
 
             this.Controls.Add(splitPrincipal);
@@ -479,5 +576,6 @@
         private System.Windows.Forms.Button btnVerTabSim;
         private System.Windows.Forms.Button btnVerCodObj;
         private System.Windows.Forms.RichTextBox rtbObjArchivo;
+        private System.Windows.Forms.Button ligadorBtn;
     }
 }
