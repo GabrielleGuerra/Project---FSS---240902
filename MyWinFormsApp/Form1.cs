@@ -2801,7 +2801,7 @@ namespace MyWinFormsApp
         // --- Cargador Ligador Button event ---
         private void ligadorBtn_Click(object sender, EventArgs e)
         {
-            var selector = new FormOrdenArchivos(new List<string>());
+            var selector = new FormCargaArchivos(new List<string>());
             selector.Show();
         }
 

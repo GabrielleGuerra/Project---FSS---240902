@@ -16,23 +16,19 @@ namespace MyWinFormsApp
 	/// </summary>
 	public class FormCL : Form
 	{
-		// --- Propiedades públicas (se asignan antes de Show()) -------------------------------------------------------------
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public List<string> RutasArchivos { get; set; }
 		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 		public string DIRPROG { get; set; } = "0000";
 
-		// --- Variables internas del cargador-ligador -------------------------------------------------------------
 		private string DIRSC;
 		private string DIREJ;
 
-		// --- Controles -------------------------------------------------------------
 		private DataGridView dgv_MemoryMap;
 		private DataGridView dgv_TABSE;
 		private Label labelEjec;
 		private Label labelLonsc;
 
-		// --- Constructor -------------------------------------------------------------
 		public FormCL()
 		{
 			InicializarComponentes();
@@ -54,9 +50,7 @@ namespace MyWinFormsApp
 			}
 		}
 
-		// ===================================================================================
 		//  UTILIDADES HEX
-		// ===================================================================================
 		private int HexToInt(string hex) => Convert.ToInt32(hex, 16);
 		private string IntToHex(int value, int digits = 6) =>
 			value.ToString("X").PadLeft(digits, '0');
@@ -65,9 +59,7 @@ namespace MyWinFormsApp
 		private string SubHex(string hex1, string hex2) =>
 			IntToHex(HexToInt(hex1) - HexToInt(hex2));
 
-		// ===================================================================================
 		//  PASO 1 — Construir TABSE
-		// ===================================================================================
 		private void EjecutarPaso1()
 		{
 			DIRSC = DIRPROG;
@@ -133,9 +125,7 @@ namespace MyWinFormsApp
 			}
 		}
 
-		// ===================================================================================
 		//  PASO 2 — Cargar en mapa de memoria y aplicar registros M
-		// ===================================================================================
 		private void EjecutarPaso2()
 		{
 			DIRSC = DIRPROG;
@@ -247,16 +237,11 @@ namespace MyWinFormsApp
 			labelEjec.Text = "Ejecución inicia en: " + direjShow.ToUpper() + "H";
 			labelLonsc.Text = "Longitud total: " + lonscShow.ToUpper() + "H";
 
-			// Post-formateo de TABSE: quitar ceros a la izquierda en dirección y longitud
 			QuitarCerosTabse();
-
-			// Auto-escalar grids
 			EscalarGrids();
 		}
 
-		// ===================================================================================
-		//  HELPERS — Mapa de memoria
-		// ===================================================================================
+		//  Mapa de memoria
 		private void EscribirEnMapaMemoria(string direccion, string byteHex)
 		{
 			// direccion es 4 chars: XXX0-XXXF; col 0 = base addr, cols 1-16 = bytes
@@ -335,9 +320,7 @@ namespace MyWinFormsApp
 			}
 		}
 
-		// ===================================================================================
-		//  HELPERS — TABSE
-		// ===================================================================================
+		//  TABSE
 		private string BuscarDireccionEnTABSE(string simbolo)
 		{
 			foreach (DataGridViewRow row in dgv_TABSE.Rows)
@@ -368,14 +351,14 @@ namespace MyWinFormsApp
 
 		private void EscalarGrids()
 		{
-			// Memory map — fuente grande para facilitar lectura
+			// Memory map
 			float escMap = 2.4f;
 			var fMap = dgv_MemoryMap.Font;
 			dgv_MemoryMap.Font = new Font(fMap.FontFamily, fMap.Size * escMap, fMap.Style);
 			dgv_MemoryMap.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 			dgv_MemoryMap.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
 
-			// TABSE — fuente mediana
+			// TABSE
 			float escTab = 1.4f;
 			var fTab = dgv_TABSE.Font;
 			dgv_TABSE.Font = new Font(fMap.FontFamily, fTab.Size * escTab, fTab.Style);
@@ -383,9 +366,7 @@ namespace MyWinFormsApp
 			dgv_TABSE.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
 		}
 
-		// ===================================================================================
-		//  ACCIONES — Botones
-		// ===================================================================================
+		//  Botones
 		private void MostrarContenidoArchivos()
 		{
 			if (RutasArchivos == null || RutasArchivos.Count == 0)
@@ -438,14 +419,12 @@ namespace MyWinFormsApp
 
 		private void Reordenar()
 		{
-			var selector = new FormOrdenArchivos(RutasArchivos ?? new List<string>());
+			var selector = new FormCargaArchivos(RutasArchivos ?? new List<string>());
 			selector.Show();
 			this.Close();
 		}
 
-		// ===================================================================================
 		//  DISEÑO DEL FORMULARIO
-		// ===================================================================================
 		private void InicializarComponentes()
 		{
 			this.Text = "Cargador-Ligador — Resultado";
@@ -454,7 +433,7 @@ namespace MyWinFormsApp
 			this.WindowState = FormWindowState.Maximized;
 			this.BackColor = Color.FromArgb(245, 245, 250);
 
-			// --- Panel superior — título + info -------------------------------------------
+			// --- título & info -------------------------------------------
 			var panelTop = new Panel
 			{
 				Dock = DockStyle.Top,
@@ -494,7 +473,7 @@ namespace MyWinFormsApp
 			panelTop.Controls.Add(labelEjec);
 			panelTop.Controls.Add(labelLonsc);
 
-			// --- Panel inferior — botones -------------------------------------------
+			// --- botones de abajo -------------------------------------------
 			var panelBottom = new Panel
 			{
 				Dock = DockStyle.Bottom,
@@ -519,7 +498,7 @@ namespace MyWinFormsApp
 			panelBottom.Controls.Add(btnReordenar);
 			panelBottom.Controls.Add(btnCerrar);
 
-			// --- SplitContainer principal — mapa de memoria | TABSE -------------------------------------------
+			// --- mapa de memoria & TABSE -------------------------------------------
 			var split = new SplitContainer
 			{
 				Dock = DockStyle.Fill,
@@ -528,7 +507,7 @@ namespace MyWinFormsApp
 				BackColor = Color.FromArgb(245, 245, 250)
 			};
 
-			// --- Panel izquierdo: Mapa de Memoria -------------------------------------------
+			// --- Mapa de Memoria -------------------------------------------
 			var panelMem = new Panel
 			{
 				Dock = DockStyle.Fill,
@@ -603,7 +582,7 @@ namespace MyWinFormsApp
 			panelMem.Controls.Add(dgv_MemoryMap);
 			panelMem.Controls.Add(lblMem);
 
-			// --- Panel derecho: TABSE -------------------------------------------
+			// --- TABSE -------------------------------------------
 			var panelTab = new Panel { Dock = DockStyle.Fill };
 
 			var lblTab = new Label

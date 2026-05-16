@@ -11,9 +11,8 @@ namespace MyWinFormsApp
     /// Formulario de configuración del Cargador-Ligador.
     /// Permite abrir archivos OBJ, reordenarlos, asignar dirección de carga y confirmar.
     /// </summary>
-    public class FormOrdenArchivos : Form
+    public class FormCargaArchivos : Form
     {
-        // --- Controles -------------------------------------------------------------
         private ListBox lstArchivos;
         private Button btnAbrirArchivos;
         private Button btnSubir;
@@ -27,15 +26,13 @@ namespace MyWinFormsApp
         // Lista paralela de rutas completas (lstArchivos solo muestra el nombre)
         private List<string> rutasCompletas;
 
-        // --- Constructor -------------------------------------------------------------
-        public FormOrdenArchivos(List<string> rutas)
+        public FormCargaArchivos(List<string> rutas)
         {
             rutasCompletas = new List<string>(rutas ?? new List<string>());
             InicializarComponentes();
             RefrescarLista();
         }
 
-        // --- Cargar nombres en el ListBox -------------------------------------------------
         private void RefrescarLista()
         {
             lstArchivos.Items.Clear();
@@ -114,7 +111,7 @@ namespace MyWinFormsApp
                 lstArchivos.SelectedIndex = Math.Min(idx, lstArchivos.Items.Count - 1);
         }
 
-        // --- Confirmar y abrir FormCL -------------------------------------------------
+        // --- Confirmar y abrir CargadorLigador  -------------------------------------------------
         private void btnConfirm_Click(object sender, EventArgs e)
         {
             if (rutasCompletas.Count == 0)
@@ -148,7 +145,7 @@ namespace MyWinFormsApp
         // --- Cancelar -------------------------------------------------------------
         private void btnCancelar_Click(object sender, EventArgs e) => this.Close();
 
-        // --- Diseño del formulario (sin archivo .Designer.cs separado) -------------
+        // --- Diseño -------------
         private void InicializarComponentes()
         {
             this.Text = "Cargador-Ligador";
@@ -171,7 +168,6 @@ namespace MyWinFormsApp
                 TextAlign = ContentAlignment.MiddleCenter
             };
 
-            // --- Título lista -------------------------------------------------------------
             var lblTitulo = new Label
             {
                 Text = "Archivos OBJ (en orden de carga):",
@@ -181,7 +177,6 @@ namespace MyWinFormsApp
                 ForeColor = Color.FromArgb(30, 30, 80)
             };
 
-            // --- ListBox -------------------------------------------------------------
             lstArchivos = new ListBox
             {
                 Location = new Point(14, 74),
@@ -204,7 +199,6 @@ namespace MyWinFormsApp
             btnEliminar = CrearBoton("X Eliminar", 392, 214, Color.Crimson);
             btnEliminar.Click += btnEliminar_Click;
 
-            // --- Dirección de carga -------------------------------------------------
             lblDirCarga = new Label
             {
                 Text = "Dirección de carga (hex):",
@@ -234,7 +228,6 @@ namespace MyWinFormsApp
                 ForeColor = Color.Gray
             };
 
-            // --- Panel inferior con botones principales -------------------------------------------------
             var panelBottom = new Panel
             {
                 Dock = DockStyle.Bottom,
@@ -273,7 +266,6 @@ namespace MyWinFormsApp
             panelBottom.Controls.Add(btnConfirm);
             panelBottom.Controls.Add(btnCancelar);
 
-            // --- Agregar al form -------------------------------------------------
             this.Controls.Add(lblHex);
             this.Controls.Add(txtDirCarga);
             this.Controls.Add(lblDirCarga);
@@ -287,7 +279,6 @@ namespace MyWinFormsApp
             this.Controls.Add(lblHeader);
         }
 
-        // --- Helper para crear botones laterales -------------------------------------------------
         private Button CrearBoton(string texto, int x, int y, Color color)
         {
             var btn = new Button
